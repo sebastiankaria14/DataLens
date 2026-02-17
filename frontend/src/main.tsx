@@ -3,12 +3,8 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.tsx';
 import { AuthProvider } from './context/AuthContext';
-import { initializeTheme } from './utils/theme';
 
 console.log('main.tsx is executing');
-
-// Initialize theme before rendering
-initializeTheme();
 
 try {
   const rootElement = document.getElementById('root');

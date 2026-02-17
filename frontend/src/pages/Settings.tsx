@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { applyTheme, getStoredTheme, type Theme } from '../utils/theme';
 
 const Settings: React.FC = () => {
   const navigate = useNavigate();
 
-  const [theme, setTheme] = useState<Theme>(getStoredTheme());
   const [emailNotifs, setEmailNotifs] = useState(true);
   const [profilingNotifs, setProfilingNotifs] = useState(true);
   const [cleaningNotifs, setCleaningNotifs] = useState(true);
@@ -20,11 +18,6 @@ const Settings: React.FC = () => {
   });
   const [passwordError, setPasswordError] = useState('');
   const [passwordSaved, setPasswordSaved] = useState(false);
-
-  // Apply theme when it changes
-  useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
 
   const handleSaveSettings = () => {
     setSaved(true);
@@ -62,16 +55,16 @@ const Settings: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       {/* Navbar */}
-      <nav className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/dashboard" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-lg">DF</span>
               </div>
-              <span className="text-xl font-bold text-gray-900 dark:text-white">DataForge</span>
+              <span className="text-xl font-bold text-gray-900">DataForge</span>
             </Link>
             <button onClick={() => navigate('/dashboard')} className="btn-secondary text-sm">
               ← Back to Dashboard
@@ -83,8 +76,8 @@ const Settings: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
-          <p className="mt-1 text-gray-600 dark:text-gray-400">Configure your DataForge experience</p>
+          <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+          <p className="mt-1 text-gray-600">Configure your DataForge experience</p>
         </div>
 
         {saved && (
@@ -94,71 +87,37 @@ const Settings: React.FC = () => {
           </div>
         )}
 
-        {/* Appearance */}
-        <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900 rounded-xl flex items-center justify-center">
-              <svg className="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Appearance</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Customize the look and feel</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3">
-            {(['light', 'dark', 'system'] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setTheme(t)}
-                className={`p-4 rounded-xl border-2 transition-all text-center ${
-                  theme === t
-                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 ring-2 ring-primary-200 dark:ring-primary-800'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-800'
-                }`}
-              >
-                <div className="mb-2 mx-auto w-12 h-8 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
-                  {t === 'light' && <div className="w-full h-full bg-white" />}
-                  {t === 'dark' && <div className="w-full h-full bg-gray-800" />}
-                  {t === 'system' && <div className="w-full h-full bg-gradient-to-r from-white to-gray-800" />}
-                </div>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 capitalize">{t}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Notifications */}
-        <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center">
-              <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Notifications</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Choose what you're notified about</p>
+              <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
+              <p className="text-sm text-gray-500">Choose what you're notified about</p>
             </div>
           </div>
 
           <div className="space-y-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">Email Notifications</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Receive email alerts for important events</p>
+                <p className="text-sm font-medium text-gray-900">Email Notifications</p>
+                <p className="text-xs text-gray-500">Receive email alerts for important events</p>
               </div>
               <Toggle enabled={emailNotifs} onChange={setEmailNotifs} />
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">Profiling Complete</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Notify when dataset profiling finishes</p>
+                <p className="text-sm font-medium text-gray-900">Profiling Complete</p>
+                <p className="text-xs text-gray-500">Notify when dataset profiling finishes</p>
               </div>
               <Toggle enabled={profilingNotifs} onChange={setProfilingNotifs} />
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">Cleaning Complete</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Notify when dataset cleaning finishes</p>
+                <p className="text-sm font-medium text-gray-900">Cleaning Complete</p>
+                <p className="text-xs text-gray-500">Notify when dataset cleaning finishes</p>
               </div>
               <Toggle enabled={cleaningNotifs} onChange={setCleaningNotifs} />
             </div>
@@ -166,28 +125,28 @@ const Settings: React.FC = () => {
         </div>
 
         {/* Data Processing */}
-        <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center">
-              <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" /></svg>
+            <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" /></svg>
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Data Processing</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Configure how datasets are processed</p>
+              <h2 className="text-lg font-semibold text-gray-900">Data Processing</h2>
+              <p className="text-sm text-gray-500">Configure how datasets are processed</p>
             </div>
           </div>
 
           <div className="space-y-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">Auto-Profile on Upload</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Automatically start profiling after upload</p>
+                <p className="text-sm font-medium text-gray-900">Auto-Profile on Upload</p>
+                <p className="text-xs text-gray-500">Automatically start profiling after upload</p>
               </div>
               <Toggle enabled={autoProfile} onChange={setAutoProfile} />
             </div>
 
             <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">Default Export Format</p>
+              <p className="text-sm font-medium text-gray-900 mb-2">Default Export Format</p>
               <div className="flex gap-3">
                 {(['parquet', 'csv'] as const).map((fmt) => (
                   <button
@@ -195,8 +154,8 @@ const Settings: React.FC = () => {
                     onClick={() => setDefaultFormat(fmt)}
                     className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
                       defaultFormat === fmt
-                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400'
-                        : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600'
+                        ? 'border-primary-500 bg-primary-50 text-primary-700'
+                        : 'border-gray-200 text-gray-600 hover:border-gray-300'
                     }`}
                   >
                     {fmt.toUpperCase()}
@@ -208,14 +167,14 @@ const Settings: React.FC = () => {
         </div>
 
         {/* Change Password */}
-        <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-xl flex items-center justify-center">
-              <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+            <div className="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center">
+              <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Security</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Update your password</p>
+              <h2 className="text-lg font-semibold text-gray-900">Security</h2>
+              <p className="text-sm text-gray-500">Update your password</p>
             </div>
           </div>
 
@@ -231,7 +190,7 @@ const Settings: React.FC = () => {
 
           <div className="space-y-4 max-w-md">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Current Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
               <input
                 type="password"
                 autoComplete="current-password"
@@ -242,7 +201,7 @@ const Settings: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
               <input
                 type="password"
                 autoComplete="new-password"
@@ -253,7 +212,7 @@ const Settings: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm New Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
               <input
                 type="password"
                 autoComplete="new-password"
