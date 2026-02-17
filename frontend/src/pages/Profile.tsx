@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import authService from '../services/auth';
 
 const Profile: React.FC = () => {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -11,15 +12,31 @@ const Profile: React.FC = () => {
     email: user?.email || '',
   });
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSave = () => {
-    setIsEditing(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+  const handleSave = async () => {
+    setError('');
+    setLoading(true);
+    
+    try {
+      const updatedUser = await authService.updateProfile({
+        full_name: formData.full_name,
+      });
+      
+      setUser(updatedUser);
+      setIsEditing(false);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to update profile');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const initials = user?.full_name
@@ -65,11 +82,27 @@ const Profile: React.FC = () => {
           </div>
         )}
 
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl shadow-sm flex items-center gap-2">
+            <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            {error}
+          </div>
+        )}
+
         {/* Profile Card */}
-        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+        <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
           {/* Cover / Banner */}
           <div className="h-32 bg-gradient-to-r from-primary-600 via-primary-500 to-indigo-500 relative">
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSI+PHBhdGggZD0iTTM2IDE4YzEuNjU3IDAgMyAxLjM0MyAzIDNzLTEuMzQzIDMtMyAzLTMtMS4zNDMtMy0zIDEuMzQzLTMgMy0zeiIvPjwvZz48L2c+PC9zdmc+')] opacity-30" />
+            <div className="absolute inset-0 opacity-20">
+              <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.5)" />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#dots)" />
+              </svg>
+            </div>
           </div>
 
           <div className="px-8 pb-8">
@@ -80,9 +113,10 @@ const Profile: React.FC = () => {
               </div>
               <button
                 onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
-                className={isEditing ? 'btn-primary text-sm' : 'btn-secondary text-sm'}
+                disabled={loading}
+                className={`${isEditing ? 'btn-primary' : 'btn-secondary'} text-sm ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                {isEditing ? '✓ Save Changes' : '✎ Edit Profile'}
+                {loading ? 'Saving...' : isEditing ? '✓ Save Changes' : '✎ Edit Profile'}
               </button>
             </div>
 

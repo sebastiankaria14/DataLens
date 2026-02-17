@@ -8,7 +8,7 @@ from ..core.security import verify_password, get_password_hash, create_access_to
 from ..core.config import settings
 from ..core.dependencies import get_current_active_user
 from ..models.user import User
-from ..schemas.user import UserCreate, UserLogin, UserResponse, Token, ForgotPassword
+from ..schemas.user import UserCreate, UserLogin, UserResponse, Token, ForgotPassword, UserUpdate
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
@@ -119,4 +119,30 @@ async def get_current_user_info(
     current_user: User = Depends(get_current_active_user)
 ):
     """Get current user information."""
+    return current_user
+
+
+@router.put("/me", response_model=UserResponse)
+async def update_current_user(
+    user_update: UserUpdate,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Update current user information."""
+    # Check if email is being changed and if it already exists
+    if user_update.email and user_update.email != current_user.email:
+        existing_user = db.query(User).filter(User.email == user_update.email).first()
+        if existing_user:
+            raise HTTPException(
+                status_code=400,
+                detail="Email already registered"
+            )
+        current_user.email = user_update.email
+    
+    # Update full name if provided
+    if user_update.full_name is not None:
+        current_user.full_name = user_update.full_name
+    
+    db.commit()
+    db.refresh(current_user)
     return current_user

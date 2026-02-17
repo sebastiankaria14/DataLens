@@ -4,7 +4,6 @@ import datasetService from '../services/dataset';
 import type {
   Dataset,
   DatasetInsight,
-  DatasetPreview,
   DatasetProfile,
   VisualizationData,
   VisualizationStats,
@@ -147,13 +146,12 @@ const DatasetDetails: React.FC = () => {
 
     const fetchExtras = async () => {
       try {
-        const [ins, prev] = await Promise.all([
+        const [ins] = await Promise.all([
           datasetService.getDatasetInsights(id),
           datasetService.getDatasetPreview(id, 40),
         ]);
         if (cancelled) return;
         setInsight(ins);
-        setPreview(prev);
       } catch (e: any) {
         if (cancelled) return;
         if (e?.response?.data?.detail) {

@@ -85,6 +85,20 @@ class AuthService {
   }
 
   /**
+   * Update current user profile
+   */
+  async updateProfile(data: { full_name?: string; email?: string }): Promise<User> {
+    const response = await api.put('/api/auth/me', data);
+    const updatedUser = response.data;
+    
+    // Update stored user data
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    window.dispatchEvent(new Event('auth:changed'));
+    
+    return updatedUser;
+  }
+
+  /**
    * Get stored auth token
    */
   getToken(): string | null {

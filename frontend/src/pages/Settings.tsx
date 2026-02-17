@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { applyTheme, getStoredTheme, type Theme } from '../utils/theme';
 
 const Settings: React.FC = () => {
   const navigate = useNavigate();
 
-  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('light');
+  const [theme, setTheme] = useState<Theme>(getStoredTheme());
   const [emailNotifs, setEmailNotifs] = useState(true);
   const [profilingNotifs, setProfilingNotifs] = useState(true);
   const [cleaningNotifs, setCleaningNotifs] = useState(true);
@@ -19,6 +20,11 @@ const Settings: React.FC = () => {
   });
   const [passwordError, setPasswordError] = useState('');
   const [passwordSaved, setPasswordSaved] = useState(false);
+
+  // Apply theme when it changes
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
 
   const handleSaveSettings = () => {
     setSaved(true);
