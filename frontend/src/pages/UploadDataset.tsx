@@ -7,6 +7,7 @@ const UploadDataset: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
   const [uploadedDatasetId, setUploadedDatasetId] = useState<number | null>(null);
@@ -60,24 +61,32 @@ const UploadDataset: React.FC = () => {
     if (!selectedFile) return;
     
     setIsUploading(true);
+    setUploadProgress(0);
     setError('');
     setSuccess('');
     setUploadedDatasetId(null);
     
     try {
-      // Upload to backend
-      const dataset = await datasetService.uploadDataset(selectedFile);
+      // Upload to backend with progress tracking
+      const dataset = await datasetService.uploadDataset(selectedFile, (progress) => {
+        setUploadProgress(progress);
+      });
 
       setSuccess('Uploaded successfully. Profiling has started in the background.');
       setUploadedDatasetId(dataset.id);
     } catch (err: any) {
       if (err?.response?.status === 401) {
         setError('Your session expired. Please sign in again, then retry the upload.');
+      } else if (err.code === 'ECONNABORTED') {
+        setError('Upload timed out. Please try again or use a smaller file.');
+      } else if (err.message === 'Network Error') {
+        setError('Network error. Please check if the backend server is running.');
       } else {
         setError(err.response?.data?.detail || 'Upload failed. Please try again.');
       }
     } finally {
       setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -186,6 +195,22 @@ const UploadDataset: React.FC = () => {
                     <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* Upload Progress */}
+          {isUploading && uploadProgress > 0 && (
+            <div className="mt-4">
+              <div className="flex justify-between text-sm text-gray-600 mb-2">
+                <span>Uploading...</span>
+                <span>{uploadProgress}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div 
+                  className="bg-primary-600 h-2.5 rounded-full transition-all duration-300" 
+                  style={{ width: `${uploadProgress}%` }}
+                />
               </div>
             </div>
           )}

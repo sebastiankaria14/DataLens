@@ -82,13 +82,20 @@ export interface CleaningOptions {
 
 class DatasetService {
   /**
-   * Upload a dataset file
+   * Upload a dataset file with progress tracking
    */
-  async uploadDataset(file: File): Promise<Dataset> {
+  async uploadDataset(file: File, onProgress?: (progress: number) => void): Promise<Dataset> {
     const formData = new FormData();
     formData.append('file', file);
     
-    const response = await api.post<Dataset>('/api/datasets/upload', formData);
+    const response = await api.post<Dataset>('/api/datasets/upload', formData, {
+      onUploadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percentCompleted);
+        }
+      },
+    });
     
     return response.data;
   }

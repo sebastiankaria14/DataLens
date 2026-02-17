@@ -6,6 +6,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 // Create axios instance with default config
 export const api = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 300000, // 5 minutes timeout for large file uploads
   // Don't force a global Content-Type.
   // Axios will set it correctly for JSON, and the browser will set proper
   // multipart boundaries for FormData uploads.
