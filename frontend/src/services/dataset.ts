@@ -27,6 +27,50 @@ export interface DatasetProfile {
   imbalance_warnings?: Array<{ column: string; severity: string; imbalance_ratio?: number; message: string }>;
 }
 
+export interface DatasetInsight {
+  summary: string;
+  ai_description?: string;
+  quality_score?: number;
+  row_count?: number;
+  column_count?: number;
+  duplicates?: number;
+  missing_rate?: number;
+  columns?: Array<{ name: string; dtype?: string; null_percentage?: number; unique_count?: number; is_categorical?: boolean }>;
+  imbalance_warnings?: Array<{ column: string; severity: string; imbalance_ratio?: number; message: string }>;
+  recommendations?: string[];
+}
+
+export interface DatasetPreview {
+  columns: Array<{ name: string; dtype: string }>;
+  rows: Array<Record<string, any>>;
+  row_count?: number;
+  column_count?: number;
+}
+
+export interface VisualizationStats {
+  min?: number;
+  max?: number;
+  mean?: number;
+  median?: number;
+  std?: number;
+  q25?: number;
+  q75?: number;
+}
+
+export interface VisualizationData {
+  chart_type: 'histogram' | 'bar' | 'box';
+  column: string;
+  column_type: 'numeric' | 'categorical';
+  data: Array<Record<string, any>>;
+  stats?: VisualizationStats;
+}
+
+export interface AIResponse {
+  answer: string;
+  related_columns?: string[];
+  recommendations?: string[];
+}
+
 export interface CleaningOptions {
   remove_duplicates?: boolean;
   handle_missing?: 'drop' | 'fill_mean' | 'fill_median' | 'fill_mode' | null;
@@ -72,6 +116,40 @@ class DatasetService {
    */
   async getDatasetProfile(id: number): Promise<DatasetProfile> {
     const response = await api.get<DatasetProfile>(`/api/datasets/${id}/profile`);
+    return response.data;
+  }
+
+  /**
+   * Get a small preview of dataset rows for visualization.
+   */
+  async getDatasetPreview(id: number, limit = 50): Promise<DatasetPreview> {
+    const response = await api.get<DatasetPreview>(`/api/datasets/${id}/preview`, { params: { limit } });
+    return response.data;
+  }
+
+  /**
+   * Get summary insights for the dataset.
+   */
+  async getDatasetInsights(id: number): Promise<DatasetInsight> {
+    const response = await api.get<DatasetInsight>(`/api/datasets/${id}/insights`);
+    return response.data;
+  }
+
+  /**
+   * Fetch visualization data (histogram/bar/box) for a column.
+   */
+  async getColumnVisualization(id: number, column: string, chartType: 'histogram' | 'bar' | 'box' | 'auto' = 'auto', bins = 20): Promise<VisualizationData> {
+    const response = await api.get<VisualizationData>(`/api/datasets/${id}/visualization`, {
+      params: { column, chart_type: chartType, bins },
+    });
+    return response.data;
+  }
+
+  /**
+   * Lightweight AI-style answer about the dataset using profiling context.
+   */
+  async askDatasetAI(id: number, question: string): Promise<AIResponse> {
+    const response = await api.post<AIResponse>(`/api/datasets/${id}/ai`, { question });
     return response.data;
   }
 

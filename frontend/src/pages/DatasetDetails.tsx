@@ -1,31 +1,26 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import datasetService from '../services/dataset';
-import type { Dataset, DatasetProfile } from '../services/dataset';
-
-function statusBadgeClasses(status: Dataset['status']): string {
-  switch (status) {
-    case 'uploaded':
-      return 'bg-gray-100 text-gray-800 border-gray-200';
-    case 'profiling':
-      return 'bg-blue-100 text-blue-800 border-blue-200';
-    case 'profiled':
-      return 'bg-green-100 text-green-800 border-green-200';
-    case 'cleaning':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    case 'cleaned':
-      return 'bg-green-100 text-green-800 border-green-200';
-    case 'failed':
-      return 'bg-red-100 text-red-800 border-red-200';
-    default:
-      return 'bg-gray-100 text-gray-800 border-gray-200';
-  }
-}
+import type {
+  Dataset,
+  DatasetInsight,
+  DatasetPreview,
+  DatasetProfile,
+  VisualizationData,
+  VisualizationStats,
+} from '../services/dataset';
+import DatasetHeader from '../components/DatasetHeader';
+import DatasetOverview from '../components/DatasetOverview';
+import ActionButtons from '../components/ActionButtons';
+import VisualizationWorkspace from '../components/VisualizationWorkspace';
+import ChatWorkspace from '../components/ChatWorkspace';
+import ProfilingStats from '../components/ProfilingStats';
+import ColumnsTable from '../components/ColumnsTable';
 
 const POLL_MS = 2000;
+type ChatMessage = { role: 'assistant' | 'user'; text: string };
 
 const DatasetDetails: React.FC = () => {
-  const navigate = useNavigate();
   const { datasetId } = useParams();
 
   const id = useMemo(() => {
@@ -35,8 +30,28 @@ const DatasetDetails: React.FC = () => {
 
   const [dataset, setDataset] = useState<Dataset | null>(null);
   const [profile, setProfile] = useState<DatasetProfile | null>(null);
+  const [insight, setInsight] = useState<DatasetInsight | null>(null);
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Workspace states
+  const [isVizOpen, setIsVizOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  
+  // Visualization states
+  const [selectedColumn, setSelectedColumn] = useState<string>('');
+  const [selectedChart, setSelectedChart] = useState<'histogram' | 'bar' | 'box'>('histogram');
+  const [vizData, setVizData] = useState<VisualizationData | null>(null);
+  const [vizStats, setVizStats] = useState<VisualizationStats | undefined>(undefined);
+  const [vizError, setVizError] = useState<string>('');
+  const [vizLoading, setVizLoading] = useState<boolean>(false);
+  
+  // AI chat states
+  const [aiMessages, setAiMessages] = useState<ChatMessage[]>([
+    { role: 'assistant', text: 'Hello! I\'m your dataset assistant. Ask me anything about your data.' },
+  ]);
+  const [aiInput, setAiInput] = useState<string>('');
+  const [aiLoading, setAiLoading] = useState<boolean>(false);
 
   const pollTimerRef = useRef<number | null>(null);
 
@@ -63,7 +78,6 @@ const DatasetDetails: React.FC = () => {
         setDataset(ds);
         setError('');
 
-        // Fetch profiling results when ready.
         if ((ds.status === 'profiled' || ds.status === 'cleaned') && !profile) {
           try {
             const p = await datasetService.getDatasetProfile(id);
@@ -71,7 +85,7 @@ const DatasetDetails: React.FC = () => {
             setProfile(p);
             stopPolling();
           } catch {
-            // Profile may not be ready yet (backend returns 400) – keep polling.
+            // Profile may not be ready yet
           }
         }
 
@@ -87,7 +101,6 @@ const DatasetDetails: React.FC = () => {
       }
     };
 
-    // Initial fetch and start polling.
     fetchOnce();
     pollTimerRef.current = window.setInterval(fetchOnce, POLL_MS);
 
@@ -95,161 +108,175 @@ const DatasetDetails: React.FC = () => {
       cancelled = true;
       stopPolling();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, profile]);
+
+  const columnNames = useMemo(() => Object.keys(profile?.columns || {}), [profile]);
+
+  const resolveColumnType = (col: string): 'numeric' | 'categorical' => {
+    const dtype = (profile?.columns as any)?.[col]?.dtype || profile?.data_types?.[col] || '';
+    const upper = (dtype || '').toString().toUpperCase();
+    if (upper.includes('INT') || upper.includes('DOUBLE') || upper.includes('FLOAT') || upper.includes('DECIMAL') || upper.includes('REAL')) {
+      return 'numeric';
+    }
+    return 'categorical';
+  };
+
+  useEffect(() => {
+    if (columnNames.length && !selectedColumn) {
+      const first = columnNames[0];
+      setSelectedColumn(first);
+      const type = resolveColumnType(first);
+      setSelectedChart(type === 'numeric' ? 'histogram' : 'bar');
+    }
+  }, [columnNames]);
+
+  useEffect(() => {
+    if (!selectedColumn) return;
+    const type = resolveColumnType(selectedColumn);
+    if (type === 'categorical' && selectedChart !== 'bar') {
+      setSelectedChart('bar');
+    }
+    if (type === 'numeric' && selectedChart === 'bar') {
+      setSelectedChart('histogram');
+    }
+  }, [selectedColumn]);
+
+  useEffect(() => {
+    if (!profile || !Number.isFinite(id)) return;
+    let cancelled = false;
+
+    const fetchExtras = async () => {
+      try {
+        const [ins, prev] = await Promise.all([
+          datasetService.getDatasetInsights(id),
+          datasetService.getDatasetPreview(id, 40),
+        ]);
+        if (cancelled) return;
+        setInsight(ins);
+        setPreview(prev);
+      } catch (e: any) {
+        if (cancelled) return;
+        if (e?.response?.data?.detail) {
+          setVizError(e.response.data.detail);
+        }
+      }
+    };
+
+    fetchExtras();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id, profile]);
+
+  const loadVisualization = async (column: string, chartType: 'histogram' | 'bar' | 'box') => {
+    if (!Number.isFinite(id) || !column) return;
+    setVizLoading(true);
+    setVizError('');
+    try {
+      const colType = resolveColumnType(column);
+      let desiredChart: 'histogram' | 'bar' | 'box' = chartType;
+      if (desiredChart === 'box' && colType !== 'numeric') {
+        desiredChart = 'bar';
+      }
+      const data = await datasetService.getColumnVisualization(id as number, column, desiredChart, 20);
+      setVizData(data);
+      setVizStats(data.stats);
+    } catch (e: any) {
+      setVizError(e?.response?.data?.detail || 'Could not load visualization data.');
+    } finally {
+      setVizLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!profile || !selectedColumn) return;
+    loadVisualization(selectedColumn, selectedChart);
+  }, [profile, selectedColumn, selectedChart]);
+
+  const handleAskAI = async (question?: string) => {
+    const prompt = (question ?? aiInput).trim();
+    if (!prompt || !Number.isFinite(id)) return;
+    setAiInput('');
+    setAiLoading(true);
+    setAiMessages((prev) => [...prev, { role: 'user', text: prompt }]);
+    try {
+      const response = await datasetService.askDatasetAI(id as number, prompt);
+      setAiMessages((prev) => [...prev, { role: 'assistant', text: response.answer }]);
+    } catch (e: any) {
+      setAiMessages((prev) => [...prev, { role: 'assistant', text: e?.response?.data?.detail || 'I could not answer that right now.' }]);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const isProfiling = dataset?.status === 'profiling' || dataset?.status === 'uploaded';
+  const isProfiled = dataset?.status === 'profiled' || dataset?.status === 'cleaned';
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <button onClick={() => navigate('/dashboard')} className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">DF</span>
-                </div>
-                <span className="text-xl font-bold text-gray-900">DataForge</span>
-              </button>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Link to="/upload" className="btn-secondary">
-                Upload Another
-              </Link>
-              <Link to="/dashboard" className="btn-primary">
-                Dashboard
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <DatasetHeader dataset={dataset} isLoading={isLoading} />
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dataset Details</h1>
-          <p className="mt-2 text-gray-600">Track profiling progress and view results.</p>
-        </div>
-
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">{error}</div>
+          <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl shadow-sm">
+            {error}
+          </div>
         )}
 
-        <div className="card">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="text-sm text-gray-500">Dataset</div>
-              <div className="text-xl font-semibold text-gray-900">
-                {dataset?.name || (isLoading ? 'Loading…' : '—')}
-              </div>
-              <div className="mt-2 text-sm text-gray-600">
-                Original file: <span className="font-medium">{dataset?.original_filename || '—'}</span>
-              </div>
-            </div>
-            <div className={`inline-flex items-center px-3 py-1 rounded-full border text-sm font-medium ${dataset ? statusBadgeClasses(dataset.status) : 'bg-gray-100 text-gray-800 border-gray-200'}`}>
-              {dataset?.status || 'loading'}
+        {isProfiling && (
+          <div className="bg-blue-50 border border-blue-200 text-blue-900 px-6 py-4 rounded-xl shadow-sm">
+            <div className="flex items-center space-x-3">
+              <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              <span>Profiling is running in the background. This page updates every {POLL_MS / 1000}s.</span>
             </div>
           </div>
+        )}
 
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <div className="text-xs text-gray-500">Rows</div>
-              <div className="text-lg font-semibold text-gray-900">{dataset?.row_count ?? '—'}</div>
-            </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <div className="text-xs text-gray-500">Columns</div>
-              <div className="text-lg font-semibold text-gray-900">{dataset?.column_count ?? '—'}</div>
-            </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <div className="text-xs text-gray-500">Created</div>
-              <div className="text-lg font-semibold text-gray-900">
-                {dataset?.created_at ? new Date(dataset.created_at).toLocaleString() : '—'}
-              </div>
-            </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <div className="text-xs text-gray-500">Profiled</div>
-              <div className="text-lg font-semibold text-gray-900">
-                {dataset?.profiled_at ? new Date(dataset.profiled_at).toLocaleString() : '—'}
-              </div>
-            </div>
-          </div>
+        {isProfiled && insight && (
+          <>
+            <DatasetOverview insight={insight} isLoading={!insight} />
 
-          {dataset?.status === 'profiling' && (
-            <div className="mt-6 bg-blue-50 border border-blue-200 text-blue-900 px-4 py-3 rounded-lg">
-              Profiling is running in the background. This page updates every {POLL_MS / 1000}s.
-            </div>
-          )}
+            <ActionButtons
+              onExploreClick={() => setIsVizOpen(true)}
+              onChatClick={() => setIsChatOpen(true)}
+              disabled={!profile}
+            />
 
-          {dataset?.status === 'uploaded' && (
-            <div className="mt-6 bg-gray-50 border border-gray-200 text-gray-800 px-4 py-3 rounded-lg">
-              Upload complete. Profiling should start momentarily.
-            </div>
-          )}
+            <ProfilingStats profile={profile} />
 
-          {profile && (
-            <div className="mt-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Profiling Results</h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                  <div className="text-xs text-green-700">Quality Score</div>
-                  <div className="text-2xl font-bold text-green-900">{profile.quality_score ?? '—'}</div>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="text-xs text-gray-500">Duplicates</div>
-                  <div className="text-2xl font-bold text-gray-900">{profile.duplicates}</div>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="text-xs text-gray-500">Memory Estimate</div>
-                  <div className="text-2xl font-bold text-gray-900">{profile.memory_usage}</div>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="text-xs text-gray-500">Columns</div>
-                  <div className="text-2xl font-bold text-gray-900">{profile.column_count}</div>
-                </div>
-              </div>
-
-              <div className="mt-6 card bg-white border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Columns</h3>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Missing</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unique</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {Object.entries(profile.columns || {}).map(([name, info]) => (
-                        <tr key={name}>
-                          <td className="px-4 py-2 text-sm font-medium text-gray-900">{name}</td>
-                          <td className="px-4 py-2 text-sm text-gray-700">{info?.dtype ?? profile.data_types?.[name] ?? '—'}</td>
-                          <td className="px-4 py-2 text-sm text-gray-700">
-                            {info?.null_count ?? profile.missing_values?.[name] ?? 0}
-                            {typeof info?.null_percentage === 'number' ? ` (${info.null_percentage}%)` : ''}
-                          </td>
-                          <td className="px-4 py-2 text-sm text-gray-700">{info?.unique_count ?? '—'}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {Array.isArray((profile as any).imbalance_warnings) && (profile as any).imbalance_warnings.length > 0 && (
-                <div className="mt-6 bg-yellow-50 border border-yellow-200 text-yellow-900 px-4 py-3 rounded-lg">
-                  <div className="font-semibold mb-2">Imbalance Warnings</div>
-                  <ul className="list-disc ml-5 text-sm space-y-1">
-                    {(profile as any).imbalance_warnings.map((w: any, idx: number) => (
-                      <li key={idx}>{w?.message || `${w?.column}: ${w?.severity}`}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+            <ColumnsTable profile={profile} />
+          </>
+        )}
       </div>
+
+      <VisualizationWorkspace
+        isOpen={isVizOpen}
+        onClose={() => setIsVizOpen(false)}
+        columnNames={columnNames}
+        selectedColumn={selectedColumn}
+        onColumnChange={setSelectedColumn}
+        selectedChart={selectedChart}
+        onChartChange={(chart) => setSelectedChart(chart as any)}
+        vizData={vizData}
+        vizStats={vizStats}
+        vizLoading={vizLoading}
+        vizError={vizError}
+        resolveColumnType={resolveColumnType}
+      />
+
+      <ChatWorkspace
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        messages={aiMessages}
+        input={aiInput}
+        onInputChange={setAiInput}
+        onSend={handleAskAI}
+        isLoading={aiLoading}
+        datasetName={dataset?.name || 'Dataset'}
+        rowCount={dataset?.row_count}
+        columnCount={dataset?.column_count}
+      />
     </div>
   );
 };

@@ -1,10 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Dashboard: React.FC = () => {
   const [datasets] = useState<any[]>([]);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    setShowProfileMenu(false);
+    logout();
+    navigate('/login');
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -43,7 +52,7 @@ const Dashboard: React.FC = () => {
                   className="flex items-center space-x-2 hover:bg-gray-100 rounded-lg p-2 transition-colors"
                 >
                   <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center">
-                    <span className="text-white font-semibold">U</span>
+                    <span className="text-white font-semibold">{user?.full_name?.charAt(0)?.toUpperCase() || 'U'}</span>
                   </div>
                   <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -54,8 +63,8 @@ const Dashboard: React.FC = () => {
                 {showProfileMenu && (
                   <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                     <div className="px-4 py-3 border-b border-gray-200">
-                      <p className="text-sm font-semibold text-gray-900">User Account</p>
-                      <p className="text-xs text-gray-500">user@example.com</p>
+                      <p className="text-sm font-semibold text-gray-900">{user?.full_name || 'User Account'}</p>
+                      <p className="text-xs text-gray-500">{user?.email || 'user@example.com'}</p>
                     </div>
                     
                     <Link
@@ -105,16 +114,15 @@ const Dashboard: React.FC = () => {
                     </Link>
                     
                     <div className="border-t border-gray-200 mt-2 pt-2">
-                      <Link
-                        to="/"
-                        className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                        onClick={() => setShowProfileMenu(false)}
+                      <button
+                        onClick={handleSignOut}
+                        className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                       >
                         <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
                         Sign Out
-                      </Link>
+                      </button>
                     </div>
                   </div>
                 )}

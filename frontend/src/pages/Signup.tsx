@@ -74,7 +74,7 @@ const Signup: React.FC = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" autoComplete="on" method="post" action="#">
             <div>
               <label htmlFor="full_name" className="block text-sm font-medium text-gray-700 mb-1">
                 Full Name
@@ -83,6 +83,7 @@ const Signup: React.FC = () => {
                 id="full_name"
                 name="full_name"
                 type="text"
+                autoComplete="name"
                 required
                 value={formData.full_name}
                 onChange={handleChange}
@@ -99,6 +100,7 @@ const Signup: React.FC = () => {
                 id="email"
                 name="email"
                 type="email"
+                autoComplete="username"
                 required
                 value={formData.email}
                 onChange={handleChange}
@@ -115,6 +117,7 @@ const Signup: React.FC = () => {
                 id="password"
                 name="password"
                 type="password"
+                autoComplete="new-password"
                 required
                 value={formData.password}
                 onChange={handleChange}
@@ -132,6 +135,7 @@ const Signup: React.FC = () => {
                 id="confirmPassword"
                 name="confirmPassword"
                 type="password"
+                autoComplete="new-password"
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}

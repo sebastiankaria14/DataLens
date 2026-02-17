@@ -7,6 +7,10 @@ import ForgotPassword from './pages/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import UploadDataset from './pages/UploadDataset';
 import DatasetDetails from './pages/DatasetDetails';
+import Profile from './pages/Profile';
+import Activities from './pages/Activities';
+import Notifications from './pages/Notifications';
+import Settings from './pages/Settings';
 import ProtectedRoute from './components/ProtectedRoute';
 
 /**
@@ -41,22 +45,22 @@ function App() {
         } />
         <Route path="/profile" element={
           <ProtectedRoute>
-            <Dashboard />
+            <Profile />
           </ProtectedRoute>
         } />
         <Route path="/activities" element={
           <ProtectedRoute>
-            <Dashboard />
+            <Activities />
           </ProtectedRoute>
         } />
         <Route path="/notifications" element={
           <ProtectedRoute>
-            <Dashboard />
+            <Notifications />
           </ProtectedRoute>
         } />
         <Route path="/settings" element={
           <ProtectedRoute>
-            <Dashboard />
+            <Settings />
           </ProtectedRoute>
         } />
         

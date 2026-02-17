@@ -55,7 +55,7 @@ const Login: React.FC = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" autoComplete="on" method="post" action="#">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                 Email Address
@@ -64,6 +64,7 @@ const Login: React.FC = () => {
                 id="email"
                 name="email"
                 type="email"
+                autoComplete="username"
                 required
                 value={formData.email}
                 onChange={handleChange}
@@ -80,6 +81,7 @@ const Login: React.FC = () => {
                 id="password"
                 name="password"
                 type="password"
+                autoComplete="current-password"
                 required
                 value={formData.password}
                 onChange={handleChange}

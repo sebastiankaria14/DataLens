@@ -221,7 +221,7 @@ const UploadDataset: React.FC = () => {
           {!success && (
             <div className="mt-6 flex justify-end space-x-3">
               <button
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/dashboard')}
                 className="btn-secondary"
               >
                 Cancel

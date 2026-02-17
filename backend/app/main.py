@@ -4,7 +4,8 @@ from contextlib import asynccontextmanager
 
 from .core.config import settings
 from .core.database import engine, Base
-from .routers import auth_router, datasets_router
+from .routers import auth_router, datasets_router, chat_router
+
 
 
 @asynccontextmanager
@@ -44,7 +45,7 @@ app.add_middleware(
 # Include routers
 app.include_router(auth_router)
 app.include_router(datasets_router)
-
+app.include_router(chat_router)
 
 @app.get("/")
 async def root():
