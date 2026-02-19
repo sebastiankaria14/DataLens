@@ -31,6 +31,7 @@ const DatasetDetails: React.FC = () => {
   const [profile, setProfile] = useState<DatasetProfile | null>(null);
   const [insight, setInsight] = useState<DatasetInsight | null>(null);
   const [error, setError] = useState<string>('');
+  const [insightError, setInsightError] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   
   // Workspace states
@@ -82,10 +83,16 @@ const DatasetDetails: React.FC = () => {
             const p = await datasetService.getDatasetProfile(id);
             if (cancelled) return;
             setProfile(p);
+            stopPolling(); // Stop polling after successful profile load
+          } catch (profileErr: any) {
+            console.error('Failed to load profile:', profileErr);
+            const errMsg = profileErr?.response?.data?.detail || 'Failed to load dataset profile';
+            setError(`Profile Error: ${errMsg}. The dataset info shows it was profiled, but the profile data could not be retrieved.`);
             stopPolling();
-          } catch {
-            // Profile may not be ready yet
           }
+        } else if (ds.status === 'profiled' || ds.status === 'cleaned') {
+          // Profile already loaded, stop polling
+          stopPolling();
         }
 
         if (ds.status === 'failed') {
@@ -107,7 +114,7 @@ const DatasetDetails: React.FC = () => {
       cancelled = true;
       stopPolling();
     };
-  }, [id, profile]);
+  }, [id]); // Remove profile from dependencies to prevent re-polling
 
   const columnNames = useMemo(() => Object.keys(profile?.columns || {}), [profile]);
 
@@ -146,17 +153,23 @@ const DatasetDetails: React.FC = () => {
 
     const fetchExtras = async () => {
       try {
-        const [ins] = await Promise.all([
-          datasetService.getDatasetInsights(id),
-          datasetService.getDatasetPreview(id, 40),
-        ]);
+        // Only fetch insights, removed preview fetch to reduce initial load
+        const ins = await datasetService.getDatasetInsights(id);
         if (cancelled) return;
         setInsight(ins);
+        setInsightError('');
       } catch (e: any) {
         if (cancelled) return;
-        if (e?.response?.data?.detail) {
-          setVizError(e.response.data.detail);
-        }
+        // Show error but create a fallback insight so page content still renders
+        const errorMsg = e?.response?.data?.detail || 'Failed to load dataset insights';
+        console.error('Failed to load insights:', e);
+        setInsightError(errorMsg);
+        setInsight({
+          summary: 'Unable to generate insights summary.',
+          quality_score: profile?.quality_score,
+          row_count: dataset?.row_count,
+          column_count: dataset?.column_count,
+        });
       }
     };
 
@@ -165,7 +178,7 @@ const DatasetDetails: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [id, profile]);
+  }, [id, profile, dataset]);
 
   const loadVisualization = async (column: string, chartType: 'histogram' | 'bar' | 'box') => {
     if (!Number.isFinite(id) || !column) return;
@@ -177,7 +190,7 @@ const DatasetDetails: React.FC = () => {
       if (desiredChart === 'box' && colType !== 'numeric') {
         desiredChart = 'bar';
       }
-      const data = await datasetService.getColumnVisualization(id as number, column, desiredChart, 20);
+      const data = await datasetService.getColumnVisualization(id as number, column, desiredChart, 15);
       setVizData(data);
       setVizStats(data.stats);
     } catch (e: any) {
@@ -187,10 +200,11 @@ const DatasetDetails: React.FC = () => {
     }
   };
 
+  // Lazy-load visualization only when workspace is opened
   useEffect(() => {
-    if (!profile || !selectedColumn) return;
+    if (!profile || !selectedColumn || !isVizOpen) return;
     loadVisualization(selectedColumn, selectedChart);
-  }, [profile, selectedColumn, selectedChart]);
+  }, [profile, selectedColumn, selectedChart, isVizOpen]);
 
   const handleAskAI = async (question?: string) => {
     const prompt = (question ?? aiInput).trim();
@@ -219,6 +233,20 @@ const DatasetDetails: React.FC = () => {
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl shadow-sm">
             {error}
+          </div>
+        )}
+
+        {insightError && (
+          <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-6 py-4 rounded-xl shadow-sm">
+            <div className="flex items-start space-x-3">
+              <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <div>
+                <p className="font-medium">Could not load full insights</p>
+                <p className="text-sm mt-1">{insightError}</p>
+              </div>
+            </div>
           </div>
         )}
 

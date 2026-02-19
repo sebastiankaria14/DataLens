@@ -214,11 +214,8 @@ def _build_insights(dataset: Dataset) -> Dict[str, Any]:
     if not recommendations:
         recommendations.append("Ready for feature engineering and baseline modeling.")
 
-    # Generate AI description (non-blocking fallback)
-    ai_description = _generate_ai_description(
-        dataset.name, row_count, column_count,
-        columns_summary, quality_score, duplicates, missing_rate
-    )
+    # AI description removed to avoid blocking LLM call - moved to separate endpoint
+    ai_description = f"Dataset with {row_count:,} rows and {column_count} columns ready for analysis."
 
     return {
         "summary": " ".join(summary_parts),
@@ -685,13 +682,19 @@ async def get_dataset_profile(
             detail="Dataset has not been profiled yet"
         )
     
+    if not dataset.profile_data:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Profile data is missing. The dataset status indicates it was profiled, but the profile data was not saved. Try re-uploading the dataset."
+        )
+    
     return dataset.profile_data
 
 
 @router.get("/{dataset_id}/preview")
 async def preview_dataset(
     dataset_id: int,
-    limit: int = 50,
+    limit: int = 20,  # Reduced default from 50 to 20 for faster response
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
@@ -718,7 +721,7 @@ async def get_column_visualization(
     dataset_id: int,
     column: str,
     chart_type: str = "auto",
-    bins: int = 20,
+    bins: int = 15,  # Reduced default from 20 to 15 for faster computation
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
