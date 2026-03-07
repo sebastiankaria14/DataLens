@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.attributes import flag_modified
 from typing import Any, Dict, List
 from pydantic import BaseModel
 import aiofiles
@@ -15,9 +16,20 @@ from ..core.dependencies import get_current_active_user
 from ..core.config import settings
 from ..models.user import User
 from ..models.dataset import Dataset, DatasetStatus
-from ..schemas.dataset import DatasetResponse, DatasetProfile, CleaningOptions
+from ..schemas.dataset import (
+    DatasetResponse, DatasetProfile, CleaningOptions,
+    MLAnalysisResponse, MLPrepareOptions,
+)
 from ..services.profiler import profiler
-from ..services.cleaner import cleaner
+from ..services.cleaner import (
+    cleaner,
+    clean_dataset_pipeline,
+    calculate_ml_readiness,
+    generate_feature_engineering_suggestions,
+    detect_target_columns,
+    recommend_ml_models,
+    prepare_ml_dataset,
+)
 from ..services.parquet_converter import parquet_converter
 from ..services.sampling import sampling_engine
 from ..services.llm_service import ask_llm
@@ -604,6 +616,7 @@ def profile_dataset_background(dataset_id: int):
             dataset.row_count = profile_data.get("row_count")
             dataset.column_count = profile_data.get("column_count")
             dataset.profile_data = profile_data
+            flag_modified(dataset, "profile_data")
             dataset.status = DatasetStatus.PROFILED
             dataset.profiled_at = datetime.utcnow()
             db.commit()
@@ -615,6 +628,7 @@ def profile_dataset_background(dataset_id: int):
                 "error": str(e),
                 "traceback": traceback.format_exc(),
             }
+            flag_modified(dataset, "profile_data")
             db.commit()
             print(f"Profiling failed for dataset {dataset_id}: {str(e)}")
             print(traceback.format_exc())
@@ -806,26 +820,36 @@ async def clean_dataset(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """Clean dataset with specified options."""
+    """Clean dataset with specified options. Runs pipeline in background."""
     dataset = db.query(Dataset).filter(
         Dataset.id == dataset_id,
         Dataset.owner_id == current_user.id
     ).first()
-    
+
     if not dataset:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Dataset not found"
         )
-    
-    # Schedule background cleaning
-    background_tasks.add_task(clean_dataset_background, dataset_id, options.dict())
-    
+
+    if dataset.status not in [DatasetStatus.PROFILED, DatasetStatus.CLEANED, DatasetStatus.FAILED]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Dataset must be profiled before cleaning."
+        )
+
+    # Mark as cleaning immediately so status endpoint reflects it
+    dataset.status = DatasetStatus.CLEANING
+    db.commit()
+
+    background_tasks.add_task(clean_dataset_background, dataset_id, options.model_dump())
+
     return {"message": "Dataset cleaning started", "dataset_id": dataset_id}
 
 
 def clean_dataset_background(dataset_id: int, options: dict):
-    """Background task to clean dataset."""
+    """Background task: run full cleaning pipeline on the parquet dataset."""
+    import traceback
     db = SessionLocal()
     try:
         dataset = db.query(Dataset).filter(Dataset.id == dataset_id).first()
@@ -833,42 +857,258 @@ def clean_dataset_background(dataset_id: int, options: dict):
             return
 
         try:
-            dataset.status = DatasetStatus.CLEANING
-            db.commit()
+            # Determine cleaned output directory
+            cleaned_dir = str(Path(settings.PROCESSED_DIR) / "cleaned")
 
-            # Create output path
-            processed_dir = Path(settings.PROCESSED_DIR)
-            processed_dir.mkdir(parents=True, exist_ok=True)
+            # Convert non-parquet files to parquet first before running pipeline
+            if dataset.file_type != "parquet":
+                parquet_dir = Path(settings.PROCESSED_DIR) / "parquet"
+                parquet_path = parquet_converter.convert_to_parquet(
+                    dataset.file_path,
+                    dataset.file_type,
+                    str(parquet_dir),
+                )
+                dataset.file_path = parquet_path
+                dataset.file_type = "parquet"
+                db.commit()
 
-            output_filename = f"cleaned_{Path(dataset.file_path).name}"
-            output_path = processed_dir / output_filename
-
-            # Clean the dataset
-            cleaning_stats = cleaner.clean_dataset(
-                file_path=dataset.file_path,
-                file_type=dataset.file_type,
-                output_path=str(output_path),
-                **options
+            # Run the cleaning pipeline
+            cleaned_path, cleaning_stats = clean_dataset_pipeline(
+                dataset_path=dataset.file_path,
+                options=options,
+                output_dir=cleaned_dir,
             )
 
-            # Update dataset
+            # Read the cleaned file to get the updated row/column counts
+            import polars as _pl
+            cleaned_schema = _pl.scan_parquet(cleaned_path).schema
+            cleaned_row_count = cleaning_stats.get("final_rows") or dataset.row_count
+            cleaned_col_count = len(cleaned_schema)
+
+            # Build updated profile_data (preserve existing profiling, overlay cleaning info)
+            profile = dict(dataset.profile_data or {})
+            profile["cleaning_stats"] = cleaning_stats
+            # Reflect the reduced row count in profile so UI shows correct numbers
+            if cleaning_stats.get("final_rows") is not None:
+                profile["row_count"] = cleaning_stats["final_rows"]
+            if cleaning_stats.get("final_columns") is not None:
+                profile["column_count"] = cleaning_stats["final_columns"]
+
+            # Update dataset record
             dataset.status = DatasetStatus.CLEANED
             dataset.cleaned_at = datetime.utcnow()
-            dataset.file_path = str(output_path)  # Update to cleaned file
-
-            # Update profile data with cleaning stats
-            if dataset.profile_data:
-                dataset.profile_data["cleaning_stats"] = cleaning_stats
+            dataset.file_path = cleaned_path
+            dataset.file_type = "parquet"
+            dataset.row_count = cleaned_row_count
+            dataset.column_count = cleaned_col_count
+            dataset.profile_data = profile
+            # Explicitly flag the JSON column as dirty so SQLAlchemy persists it
+            flag_modified(dataset, "profile_data")
 
             db.commit()
         except Exception as e:
             dataset.status = DatasetStatus.FAILED
-            if dataset.profile_data:
-                dataset.profile_data["error"] = str(e)
-            else:
-                dataset.profile_data = {"error": str(e)}
+            profile = dict(dataset.profile_data or {})
+            profile["cleaning_error"] = str(e)
+            profile["cleaning_traceback"] = traceback.format_exc()
+            dataset.profile_data = profile
+            flag_modified(dataset, "profile_data")
             db.commit()
-            print(f"Cleaning failed for dataset {dataset_id}: {str(e)}")
+            print(f"Cleaning failed for dataset {dataset_id}: {e}")
+            print(traceback.format_exc())
+    finally:
+        db.close()
+
+
+@router.get("/{dataset_id}/clean/status")
+async def get_cleaning_status(
+    dataset_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """Return current cleaning status and stats if available."""
+    dataset = db.query(Dataset).filter(
+        Dataset.id == dataset_id,
+        Dataset.owner_id == current_user.id
+    ).first()
+    if not dataset:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Dataset not found")
+
+    profile = dataset.profile_data or {}
+    return {
+        "dataset_id": dataset_id,
+        "status": dataset.status,
+        "cleaned_at": dataset.cleaned_at,
+        "cleaning_stats": profile.get("cleaning_stats"),
+        "cleaning_error": profile.get("cleaning_error"),
+    }
+
+
+@router.get("/{dataset_id}/download-cleaned")
+async def download_cleaned_dataset(
+    dataset_id: int,
+    format: str = "parquet",  # parquet | csv | excel
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """Download the cleaned dataset in parquet, csv, or excel format."""
+    from fastapi.responses import FileResponse, StreamingResponse
+    import io
+
+    dataset = db.query(Dataset).filter(
+        Dataset.id == dataset_id,
+        Dataset.owner_id == current_user.id
+    ).first()
+    if not dataset:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Dataset not found")
+    if dataset.status != DatasetStatus.CLEANED:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Dataset has not been cleaned yet.")
+
+    file_path = Path(dataset.file_path)
+    if not file_path.exists():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cleaned file not found on disk.")
+
+    stem = Path(dataset.original_filename).stem
+
+    if format == "parquet":
+        return FileResponse(
+            path=file_path,
+            filename=f"{stem}_cleaned.parquet",
+            media_type="application/octet-stream",
+        )
+    elif format == "csv":
+        df = pl.read_parquet(str(file_path))
+        buf = io.BytesIO()
+        df.write_csv(buf)
+        buf.seek(0)
+        return StreamingResponse(
+            buf,
+            media_type="text/csv",
+            headers={"Content-Disposition": f'attachment; filename="{stem}_cleaned.csv"'},
+        )
+    elif format in ("excel", "xlsx"):
+        df = pl.read_parquet(str(file_path))
+        buf = io.BytesIO()
+        df.write_excel(buf)
+        buf.seek(0)
+        return StreamingResponse(
+            buf,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f'attachment; filename="{stem}_cleaned.xlsx"'},
+        )
+    else:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unsupported format '{format}'. Use parquet, csv, or excel.")
+
+
+@router.get("/{dataset_id}/ml-analysis")
+async def get_ml_analysis(
+    dataset_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """Return ML readiness, feature suggestions, target detection, and model recommendations."""
+    dataset = db.query(Dataset).filter(
+        Dataset.id == dataset_id,
+        Dataset.owner_id == current_user.id
+    ).first()
+    if not dataset:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Dataset not found")
+    if dataset.status not in [DatasetStatus.PROFILED, DatasetStatus.CLEANED]:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Dataset must be profiled first.")
+
+    profile = dataset.profile_data or {}
+    cleaning_stats = profile.get("cleaning_stats")
+
+    # ML Readiness
+    ml_readiness = calculate_ml_readiness(profile, cleaning_stats)
+
+    # Feature Engineering Suggestions & Target Detection (use DuckDB — no full load)
+    try:
+        feature_suggestions = generate_feature_engineering_suggestions(
+            dataset.file_path, dataset.file_type or "parquet"
+        )
+    except Exception as e:
+        feature_suggestions = {"error": str(e)}
+
+    try:
+        target_columns = detect_target_columns(
+            dataset.file_path, dataset.file_type or "parquet"
+        )
+    except Exception as e:
+        target_columns = []
+
+    # Model recommendations (use first detected target to infer type)
+    target_type = "categorical"
+    if target_columns:
+        col_name = target_columns[0]
+        data_types = profile.get("data_types") or {}
+        col_dtype = (data_types.get(col_name) or "").upper()
+        if any(t in col_dtype for t in ["INT", "DOUBLE", "FLOAT", "DECIMAL"]):
+            target_type = "numeric"
+
+    model_recommendations = recommend_ml_models(target_type)
+
+    return {
+        "ml_readiness": ml_readiness,
+        "feature_suggestions": feature_suggestions,
+        "target_columns": target_columns,
+        "model_recommendations": model_recommendations,
+    }
+
+
+@router.post("/{dataset_id}/prepare-ml")
+async def prepare_ml(
+    dataset_id: int,
+    payload: MLPrepareOptions,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """Automatically prepare a dataset for ML (clean + normalize + encode + split)."""
+    dataset = db.query(Dataset).filter(
+        Dataset.id == dataset_id,
+        Dataset.owner_id == current_user.id
+    ).first()
+    if not dataset:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Dataset not found")
+    if dataset.status not in [DatasetStatus.PROFILED, DatasetStatus.CLEANED]:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Dataset must be profiled before ML preparation.")
+
+    background_tasks.add_task(
+        prepare_ml_background, dataset_id, payload.model_dump()
+    )
+    return {"message": "ML preparation started", "dataset_id": dataset_id}
+
+
+def prepare_ml_background(dataset_id: int, payload: dict):
+    """Background task: clean + split dataset for ML."""
+    import traceback
+    db = SessionLocal()
+    try:
+        dataset = db.query(Dataset).filter(Dataset.id == dataset_id).first()
+        if not dataset:
+            return
+        try:
+            ml_dir = str(Path(settings.PROCESSED_DIR) / "ml_ready")
+            stats = prepare_ml_dataset(
+                dataset_path=dataset.file_path,
+                target_column=payload.get("target_column"),
+                test_size=payload.get("test_size", 0.2),
+                normalize=payload.get("normalize", True),
+                encode=payload.get("encode", True),
+                output_dir=ml_dir,
+            )
+            profile = dict(dataset.profile_data or {})
+            profile["ml_preparation"] = stats
+            dataset.profile_data = profile
+            db.commit()
+        except Exception as e:
+            profile = dict(dataset.profile_data or {})
+            profile["ml_preparation_error"] = str(e)
+            dataset.profile_data = profile
+            db.commit()
+            print(f"ML preparation failed for dataset {dataset_id}: {e}")
+            print(traceback.format_exc())
     finally:
         db.close()
 

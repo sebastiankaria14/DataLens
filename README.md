@@ -106,10 +106,20 @@ All processing happens server-side with **no in-memory data loading**, making it
 
 #### User Experience
 - Modern, responsive UI with Tailwind CSS
-- Real-time progress indicators
+- Real-time progress indicators and live polling banners
 - Error handling with user-friendly messages
-- Dark mode support (theme-aware components)
 - Mobile-responsive design
+- **Re-clean with new options** — run the cleaning pipeline multiple times with updated settings
+- **No-op validation** — warns the user if no cleaning operations are selected
+
+#### Dashboard & Activity Tracking
+- Live dashboard loaded from real API data (total datasets, profiled, cleaned, quality score)
+- Activities page showing a timestamped event timeline derived from dataset upload/profile/clean timestamps
+- Dataset list on dashboard is clickable and links directly to each dataset
+
+#### Account Settings
+- Profile name and email update
+- Working change-password form wired to a dedicated backend endpoint
 
 ### 🔄 Pending Features
 
@@ -351,7 +361,8 @@ ollama serve
 | `POST` | `/api/auth/login/json` | Login (JSON body) |
 | `POST` | `/api/auth/forgot-password` | Request password reset |
 | `GET` | `/api/auth/me` | Get current user profile |
-| `PUT` | `/api/auth/me` | Update user profile |
+| `PUT` | `/api/auth/me` | Update user profile (name, email) |
+| `POST` | `/api/auth/change-password` | Change account password |
 
 ### Dataset Endpoints
 
@@ -369,7 +380,11 @@ ollama serve
 | `POST` | `/api/datasets/{id}/balance` | Balance classes |
 | `GET` | `/api/datasets/{id}/analyze-imbalance/{column}` | Analyze class imbalance |
 | `POST` | `/api/datasets/{id}/train-test-split` | Split for ML training |
-| `GET` | `/api/datasets/{id}/download` | Download dataset |
+| `GET` | `/api/datasets/{id}/download` | Download original dataset |
+| `GET` | `/api/datasets/{id}/download-cleaned` | Download cleaned dataset (format param) |
+| `GET` | `/api/datasets/{id}/clean/status` | Get cleaning job status |
+| `GET` | `/api/datasets/{id}/ml-analysis` | Get ML-ready analysis |
+| `POST` | `/api/datasets/{id}/prepare-ml` | Prepare dataset for ML (encodings, splits) |
 | `DELETE` | `/api/datasets/{id}` | Delete dataset |
 
 **Interactive API Docs**: Visit http://localhost:8000/docs after starting the backend
@@ -520,7 +535,13 @@ DataForge is designed for **high performance** even with large datasets:
 - [x] Class balancing and imbalance analysis
 - [x] Train-test splitting
 - [x] Multi-format export
-- [x] Real-time progress indicators
+- [x] Re-clean with updated options (run pipeline multiple times)
+- [x] Cleaning validation (warns on no-op before submitting)
+- [x] Real-time progress indicators & cleaning status polling
+- [x] Live dashboard with real dataset stats
+- [x] Activities page with real event timeline
+- [x] Settings page with working change-password
+- [x] ML analysis endpoint and preparation pipeline
 - [x] Responsive UI with Tailwind CSS
 - [x] Error handling and validation
 - [x] Performance optimizations
@@ -534,6 +555,8 @@ DataForge is designed for **high performance** even with large datasets:
 - [x] CORS configuration
 - [x] API documentation (Swagger/ReDoc)
 - [x] Environment-based configuration
+- [x] `flag_modified` for reliable SQLAlchemy JSON column persistence
+- [x] Unified cleaning pipeline (all uploads normalised to Parquet before cleaning)
 
 ---
 
@@ -565,7 +588,6 @@ DataForge is designed for **high performance** even with large datasets:
 - [ ] Drag-and-drop file upload
 - [ ] Bulk operations
 - [ ] Dataset search and filters
-- [ ] User preferences/settings
 - [ ] Dark mode toggle
 - [ ] Keyboard shortcuts
 - [ ] Onboarding tutorial
@@ -662,4 +684,4 @@ Built as a production-grade demonstration of full-stack development, data engine
 
 **Status**: ✅ **Core Features Complete** | 🚀 **Production Ready**
 
-*Last Updated: February 19, 2026*
+*Last Updated: July 2025*

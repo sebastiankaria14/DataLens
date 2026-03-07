@@ -48,3 +48,8 @@ class ResetPassword(BaseModel):
 class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     email: Optional[EmailStr] = None
+
+
+class ChangePassword(BaseModel):
+    current_password: str
+    new_password: str

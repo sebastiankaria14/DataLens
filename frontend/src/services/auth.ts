@@ -99,6 +99,17 @@ class AuthService {
   }
 
   /**
+   * Change the current user's password
+   */
+  async changePassword(currentPassword: string, newPassword: string): Promise<{ message: string }> {
+    const response = await api.post<{ message: string }>('/api/auth/change-password', {
+      current_password: currentPassword,
+      new_password: newPassword,
+    });
+    return response.data;
+  }
+
+  /**
    * Get stored auth token
    */
   getToken(): string | null {

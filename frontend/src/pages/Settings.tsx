@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import authService from '../services/auth';
 
 const Settings: React.FC = () => {
   const navigate = useNavigate();
@@ -18,14 +19,19 @@ const Settings: React.FC = () => {
   });
   const [passwordError, setPasswordError] = useState('');
   const [passwordSaved, setPasswordSaved] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   const handleSaveSettings = () => {
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
 
-  const handleChangePassword = () => {
+  const handleChangePassword = async () => {
     setPasswordError('');
+    if (!passwordData.current) {
+      setPasswordError('Current password is required');
+      return;
+    }
     if (passwordData.newPass.length < 8) {
       setPasswordError('Password must be at least 8 characters');
       return;
@@ -34,9 +40,17 @@ const Settings: React.FC = () => {
       setPasswordError('Passwords do not match');
       return;
     }
-    setPasswordSaved(true);
-    setPasswordData({ current: '', newPass: '', confirm: '' });
-    setTimeout(() => setPasswordSaved(false), 3000);
+    setPasswordLoading(true);
+    try {
+      await authService.changePassword(passwordData.current, passwordData.newPass);
+      setPasswordSaved(true);
+      setPasswordData({ current: '', newPass: '', confirm: '' });
+      setTimeout(() => setPasswordSaved(false), 3000);
+    } catch (err: any) {
+      setPasswordError(err?.response?.data?.detail || 'Failed to change password');
+    } finally {
+      setPasswordLoading(false);
+    }
   };
 
   const Toggle: React.FC<{ enabled: boolean; onChange: (v: boolean) => void }> = ({ enabled, onChange }) => (
@@ -222,8 +236,8 @@ const Settings: React.FC = () => {
                 placeholder="••••••••"
               />
             </div>
-            <button onClick={handleChangePassword} className="btn-primary text-sm">
-              Update Password
+            <button onClick={handleChangePassword} disabled={passwordLoading} className="btn-primary text-sm disabled:opacity-60">
+              {passwordLoading ? 'Updating…' : 'Update Password'}
             </button>
           </div>
         </div>

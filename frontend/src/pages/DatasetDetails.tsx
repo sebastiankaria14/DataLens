@@ -15,9 +15,13 @@ import VisualizationWorkspace from '../components/VisualizationWorkspace';
 import ChatWorkspace from '../components/ChatWorkspace';
 import ProfilingStats from '../components/ProfilingStats';
 import ColumnsTable from '../components/ColumnsTable';
+import CleaningPanel from '../components/CleaningPanel';
+import MLPanel from '../components/MLPanel';
+import CleaningCharts from '../components/CleaningCharts';
 
 const POLL_MS = 2000;
 type ChatMessage = { role: 'assistant' | 'user'; text: string };
+type Section = 'profile' | 'clean' | 'ml';
 
 const DatasetDetails: React.FC = () => {
   const { datasetId } = useParams();
@@ -33,6 +37,7 @@ const DatasetDetails: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [insightError, setInsightError] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
+  const [activeSection, setActiveSection] = useState<Section>('profile');
   
   // Workspace states
   const [isVizOpen, setIsVizOpen] = useState(false);
@@ -78,27 +83,25 @@ const DatasetDetails: React.FC = () => {
         setDataset(ds);
         setError('');
 
-        if ((ds.status === 'profiled' || ds.status === 'cleaned') && !profile) {
+        const done = ds.status === 'profiled' || ds.status === 'cleaned';
+
+        if (done) {
           try {
             const p = await datasetService.getDatasetProfile(id);
             if (cancelled) return;
             setProfile(p);
-            stopPolling(); // Stop polling after successful profile load
+            stopPolling();
           } catch (profileErr: any) {
             console.error('Failed to load profile:', profileErr);
             const errMsg = profileErr?.response?.data?.detail || 'Failed to load dataset profile';
-            setError(`Profile Error: ${errMsg}. The dataset info shows it was profiled, but the profile data could not be retrieved.`);
+            setError(`Profile Error: ${errMsg}.`);
             stopPolling();
           }
-        } else if (ds.status === 'profiled' || ds.status === 'cleaned') {
-          // Profile already loaded, stop polling
-          stopPolling();
-        }
-
-        if (ds.status === 'failed') {
+        } else if (ds.status === 'failed') {
           stopPolling();
           setError('Profiling failed for this dataset.');
         }
+        // Keep polling while 'uploaded', 'profiling', or 'cleaning'
       } catch (e: any) {
         if (cancelled) return;
         setError(e?.response?.data?.detail || 'Failed to load dataset.');
@@ -223,13 +226,58 @@ const DatasetDetails: React.FC = () => {
   };
 
   const isProfiling = dataset?.status === 'profiling' || dataset?.status === 'uploaded';
+  const isCleaning = dataset?.status === 'cleaning';
   const isProfiled = dataset?.status === 'profiled' || dataset?.status === 'cleaned';
+
+  // Handler: called when cleaning is triggered — update status locally + restart polling
+  const handleCleaningStart = () => {
+    setDataset(prev => prev ? { ...prev, status: 'cleaning' } : prev);
+    // Restart polling if it has stopped
+    if (!pollTimerRef.current) {
+      const fetchOnce = async () => {
+        try {
+          const ds = await datasetService.getDataset(id);
+          setDataset(ds);
+          if (ds.status === 'profiled' || ds.status === 'cleaned') {
+            try {
+              const p = await datasetService.getDatasetProfile(id);
+              setProfile(p);
+            } catch (_) {}
+            if (pollTimerRef.current) {
+              window.clearInterval(pollTimerRef.current);
+              pollTimerRef.current = null;
+            }
+          } else if (ds.status === 'failed') {
+            if (pollTimerRef.current) {
+              window.clearInterval(pollTimerRef.current);
+              pollTimerRef.current = null;
+            }
+          }
+        } catch (_) {}
+      };
+      pollTimerRef.current = window.setInterval(fetchOnce, POLL_MS);
+    }
+  };
+
+  // Handler: after cleaning completes, re-fetch profile to get updated stats
+  const handleCleaningComplete = async () => {
+    if (!Number.isFinite(id)) return;
+    try {
+      const [ds, p] = await Promise.all([
+        datasetService.getDataset(id),
+        datasetService.getDatasetProfile(id),
+      ]);
+      setDataset(ds);
+      setProfile(p);
+    } catch (_) {}
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <DatasetHeader dataset={dataset} isLoading={isLoading} />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        {/* Errors */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl shadow-sm">
             {error}
@@ -250,28 +298,91 @@ const DatasetDetails: React.FC = () => {
           </div>
         )}
 
+        {/* Status banners */}
         {isProfiling && (
           <div className="bg-blue-50 border border-blue-200 text-blue-900 px-6 py-4 rounded-xl shadow-sm">
             <div className="flex items-center space-x-3">
-              <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-              <span>Profiling is running in the background. This page updates every {POLL_MS / 1000}s.</span>
+              <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+              <span>Profiling in progress — updates every {POLL_MS / 1000}s.</span>
             </div>
           </div>
         )}
 
+        {isCleaning && (
+          <div className="bg-emerald-50 border border-emerald-200 text-emerald-900 px-6 py-4 rounded-xl shadow-sm">
+            <div className="flex items-center space-x-3">
+              <div className="w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+              <span>Cleaning in progress — this page will refresh automatically.</span>
+            </div>
+          </div>
+        )}
+
+        {/* Main content once profiled / cleaned */}
         {isProfiled && insight && (
           <>
             <DatasetOverview insight={insight} isLoading={!insight} />
 
-            <ActionButtons
-              onExploreClick={() => setIsVizOpen(true)}
-              onChatClick={() => setIsChatOpen(true)}
-              disabled={!profile}
-            />
+            {/* Section tab bar */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200">
+              <div className="flex overflow-x-auto">
+                {([
+                  { key: 'profile', label: 'Profile & Explore', icon: '📊' },
+                  { key: 'clean', label: 'Clean Dataset', icon: '🧹' },
+                  { key: 'ml', label: 'ML Preparation', icon: '🤖' },
+                ] as { key: Section; label: string; icon: string }[]).map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveSection(tab.key)}
+                    className={`flex-1 min-w-[140px] px-6 py-4 text-sm font-semibold transition-all whitespace-nowrap flex items-center justify-center gap-2 ${
+                      activeSection === tab.key
+                        ? 'border-b-2 border-blue-500 text-blue-600 bg-blue-50'
+                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <span>{tab.icon}</span>
+                    <span>{tab.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
 
-            <ProfilingStats profile={profile} />
+            {/* Profile section */}
+            {activeSection === 'profile' && (
+              <>
+                <ActionButtons
+                  onExploreClick={() => setIsVizOpen(true)}
+                  onChatClick={() => setIsChatOpen(true)}
+                  disabled={!profile}
+                />
+                <ProfilingStats profile={profile} />
+                <ColumnsTable profile={profile} />
+              </>
+            )}
 
-            <ColumnsTable profile={profile} />
+            {/* Clean section */}
+            {activeSection === 'clean' && (
+              <>
+                <CleaningPanel
+                  datasetId={id}
+                  profile={profile}
+                  datasetStatus={dataset?.status ?? ''}
+                  onCleaningComplete={handleCleaningComplete}
+                  onCleaningStart={handleCleaningStart}
+                />
+                {profile?.cleaning_stats && (
+                  <CleaningCharts profile={profile} />
+                )}
+              </>
+            )}
+
+            {/* ML section */}
+            {activeSection === 'ml' && (
+              <MLPanel
+                datasetId={id}
+                datasetStatus={dataset?.status ?? ''}
+                onPrepareComplete={handleCleaningComplete}
+              />
+            )}
           </>
         )}
       </div>
@@ -304,7 +415,6 @@ const DatasetDetails: React.FC = () => {
         columnCount={dataset?.column_count}
       />
     </div>
-  );
-};
+  );};
 
 export default DatasetDetails;

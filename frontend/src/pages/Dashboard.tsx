@@ -1,9 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import datasetService from '../services/dataset';
+import type { Dataset } from '../services/dataset';
 
 const Dashboard: React.FC = () => {
-  const [datasets] = useState<any[]>([]);
+  const [datasets, setDatasets] = useState<Dataset[]>([]);
+  const [datasetsLoading, setDatasetsLoading] = useState(true);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const { user, logout } = useAuth();
@@ -25,6 +28,28 @@ const Dashboard: React.FC = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Load datasets from API
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const data = await datasetService.getDatasets();
+        if (!cancelled) setDatasets(data);
+      } catch (_) {
+        // silently ignore; user sees empty state
+      } finally {
+        if (!cancelled) setDatasetsLoading(false);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Computed stats
+  const totalRows = datasets.reduce((acc, d) => acc + (d.row_count ?? 0), 0);
+  const cleanedCount = datasets.filter((d) => d.status === 'cleaned').length;
+  const totalStorageMB = datasets.reduce((acc, d) => acc + (d.file_size ?? 0), 0) / (1024 * 1024);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -202,7 +227,9 @@ const Dashboard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="card">
             <div className="text-sm font-medium text-gray-600">Total Datasets</div>
-            <div className="text-3xl font-bold text-gray-900 mt-2">{datasets.length}</div>
+            <div className="text-3xl font-bold text-gray-900 mt-2">
+              {datasetsLoading ? '—' : datasets.length}
+            </div>
             <div className="text-xs text-gray-500 mt-1">
               {datasets.length === 0 ? 'Upload your first dataset' : 'Across all projects'}
             </div>
@@ -210,25 +237,36 @@ const Dashboard: React.FC = () => {
           
           <div className="card">
             <div className="text-sm font-medium text-gray-600">Total Rows</div>
-            <div className="text-3xl font-bold text-gray-900 mt-2">0</div>
+            <div className="text-3xl font-bold text-gray-900 mt-2">
+              {datasetsLoading ? '—' : totalRows.toLocaleString()}
+            </div>
             <div className="text-xs text-gray-500 mt-1">Across all datasets</div>
           </div>
           
           <div className="card">
             <div className="text-sm font-medium text-gray-600">Cleaned</div>
-            <div className="text-3xl font-bold text-gray-900 mt-2">0</div>
+            <div className="text-3xl font-bold text-gray-900 mt-2">
+              {datasetsLoading ? '—' : cleanedCount}
+            </div>
             <div className="text-xs text-gray-500 mt-1">Ready for ML</div>
           </div>
           
           <div className="card">
             <div className="text-sm font-medium text-gray-600">Storage Used</div>
-            <div className="text-3xl font-bold text-gray-900 mt-2">0 MB</div>
-            <div className="text-xs text-gray-500 mt-1">Of available space</div>
+            <div className="text-3xl font-bold text-gray-900 mt-2">
+              {datasetsLoading ? '—' : `${totalStorageMB.toFixed(1)} MB`}
+            </div>
+            <div className="text-xs text-gray-500 mt-1">Uploaded files</div>
           </div>
         </div>
 
-        {/* Recent Activity or Empty State */}
-        {datasets.length === 0 ? (
+        {/* Recent Datasets or Empty State */}
+        {datasetsLoading ? (
+          <div className="card text-center py-12">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600 mx-auto mb-4" />
+            <p className="text-gray-500 text-sm">Loading datasets…</p>
+          </div>
+        ) : datasets.length === 0 ? (
           <div className="card text-center py-12">
             <svg className="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -243,9 +281,56 @@ const Dashboard: React.FC = () => {
           </div>
         ) : (
           <div className="card">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Datasets</h2>
-            <div className="space-y-4">
-              {/* Dataset list will go here */}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Your Datasets</h2>
+              <Link to="/upload" className="btn-primary text-sm">+ New Dataset</Link>
+            </div>
+            <div className="space-y-3">
+              {datasets.slice().sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).map((ds) => {
+                const statusColor: Record<string, string> = {
+                  uploaded: 'bg-blue-100 text-blue-700',
+                  profiling: 'bg-yellow-100 text-yellow-700',
+                  profiled: 'bg-green-100 text-green-700',
+                  cleaning: 'bg-orange-100 text-orange-700',
+                  cleaned: 'bg-emerald-100 text-emerald-700',
+                  failed: 'bg-red-100 text-red-700',
+                };
+                return (
+                  <Link
+                    key={ds.id}
+                    to={`/datasets/${ds.id}`}
+                    className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-primary-300 hover:bg-primary-50 transition-all group"
+                  >
+                    <div className="flex items-center space-x-4 min-w-0">
+                      <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-primary-200 transition-colors">
+                        <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-gray-900 truncate">{ds.name || ds.original_filename}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {ds.row_count ? `${ds.row_count.toLocaleString()} rows` : 'Profiling…'}
+                          {ds.column_count ? ` · ${ds.column_count} cols` : ''}
+                          {' · '}
+                          {datasetService.formatFileSize(ds.file_size)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3 flex-shrink-0 ml-4">
+                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusColor[ds.status] ?? 'bg-gray-100 text-gray-700'}`}>
+                        {ds.status}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        {new Date(ds.created_at).toLocaleDateString()}
+                      </span>
+                      <svg className="w-4 h-4 text-gray-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         )}
