@@ -119,18 +119,12 @@ const CleaningPanel: React.FC<CleaningPanelProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="bg-white rounded-2xl shadow-lg overflow-hidden"
+      className="bg-white rounded-xl border border-slate-200 overflow-hidden"
     >
       {/* Header */}
-      <div className="bg-gradient-to-r from-emerald-500 to-teal-600 px-8 py-6">
-        <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-          <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-          </svg>
-          Clean Dataset
-        </h2>
-        <p className="text-emerald-100 mt-1 text-sm">
+      <div className="px-8 py-6 border-b border-slate-100">
+        <h2 className="text-lg font-semibold text-slate-900">Clean Dataset</h2>
+        <p className="text-slate-500 mt-0.5 text-sm">
           Configure and apply data cleaning operations to improve dataset quality.
         </p>
       </div>
@@ -176,16 +170,18 @@ const CleaningPanel: React.FC<CleaningPanelProps> = ({
               <label className="text-sm font-medium text-gray-700">Handle Missing Values</label>
               <p className="text-xs text-gray-500">{totalMissing} missing cells total</p>
               <select
-                className="mt-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:ring-2 focus:ring-emerald-400 outline-none transition"
+                className="mt-1 border border-slate-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:ring-2 focus:ring-indigo-400 outline-none transition"
                 value={options.handle_missing ?? ''}
                 onChange={(e) => setOptions((o) => ({ ...o, handle_missing: (e.target.value || null) as any }))}
               >
                 <option value="">— No action —</option>
+                <option value="auto">Auto (smart fill by column type)</option>
                 <option value="drop">Drop rows with nulls</option>
-                <option value="fill_mean">Fill with mean</option>
-                <option value="fill_median">Fill with median</option>
-                <option value="fill_mode">Fill with mode</option>
-                <option value="fill_zero">Fill with zero</option>
+                <option value="fill_mean">Fill with mean (numbers) / mode (text)</option>
+                <option value="fill_median">Fill with median (numbers) / mode (text)</option>
+                <option value="fill_mode">Fill with most frequent value</option>
+                <option value="fill_zero">Fill with zero (numbers) / empty (text)</option>
+                <option value="fill_empty">Fill with empty string (text columns)</option>
               </select>
             </div>
 
@@ -202,7 +198,7 @@ const CleaningPanel: React.FC<CleaningPanelProps> = ({
                   <div>
                     <label className="text-xs font-medium text-gray-600">Detection</label>
                     <select
-                      className="mt-1 w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-emerald-400 outline-none"
+                      className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-indigo-400 outline-none"
                       value={options.outlier_method}
                       onChange={(e) => setOptions((o) => ({ ...o, outlier_method: e.target.value as any }))}
                     >
@@ -213,7 +209,7 @@ const CleaningPanel: React.FC<CleaningPanelProps> = ({
                   <div>
                     <label className="text-xs font-medium text-gray-600">Action</label>
                     <select
-                      className="mt-1 w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-emerald-400 outline-none"
+                      className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-indigo-400 outline-none"
                       value={options.outlier_action}
                       onChange={(e) => setOptions((o) => ({ ...o, outlier_action: e.target.value as any }))}
                     >
@@ -253,7 +249,7 @@ const CleaningPanel: React.FC<CleaningPanelProps> = ({
         {/* No-op warning */}
         {noOpWarning && (
           <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl px-5 py-4 text-sm">
-            ⚠️ Please enable at least one cleaning operation before starting.
+            Please enable at least one cleaning operation before starting.
           </div>
         )}
 
@@ -263,12 +259,12 @@ const CleaningPanel: React.FC<CleaningPanelProps> = ({
           whileTap={{ scale: 0.98 }}
           onClick={handleStartCleaning}
           disabled={isCleaning}
-          className={`w-full py-4 rounded-2xl font-semibold text-white text-lg shadow-lg transition-all duration-300 flex items-center justify-center gap-3 ${
+          className={`w-full py-3.5 rounded-xl font-semibold text-white text-sm shadow-sm transition-all duration-300 flex items-center justify-center gap-3 ${
             isCleaning
-              ? 'bg-gray-400 cursor-not-allowed'
+              ? 'bg-slate-300 cursor-not-allowed'
               : isCleaned
-              ? 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:shadow-xl'
-              : 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:shadow-xl'
+              ? 'bg-indigo-600 hover:bg-indigo-700'
+              : 'bg-indigo-600 hover:bg-indigo-700'
           }`}
         >
           {isCleaning ? (
@@ -301,8 +297,8 @@ const CleaningPanel: React.FC<CleaningPanelProps> = ({
               animate={{ opacity: 1, height: 'auto' }}
               className="space-y-4"
             >
-              <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
+              <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
                 Cleaning Results
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -313,12 +309,12 @@ const CleaningPanel: React.FC<CleaningPanelProps> = ({
               </div>
 
               {cleaningStats.operations_performed && cleaningStats.operations_performed.length > 0 && (
-                <div className="bg-gray-50 rounded-xl p-4 space-y-2">
-                  <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Applied Operations</p>
+                <div className="bg-slate-50 rounded-xl p-4 space-y-2">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Applied Operations</p>
                   {cleaningStats.operations_performed.map((op, i) => (
-                    <div key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                    <div key={i} className="flex items-start gap-2 text-xs text-slate-600">
                       <span className="text-emerald-500 mt-0.5">✓</span>
-                      <span className="font-mono text-xs bg-gray-200 rounded px-1.5 py-0.5">{op.operation}</span>
+                      <span className="font-mono bg-slate-100 rounded px-1.5 py-0.5">{op.operation}</span>
                       <span className="text-gray-500">
                         {op.rows_removed != null ? `${op.rows_removed} rows removed` : ''}
                         {op.columns_filled != null ? `${op.columns_filled} columns filled` : ''}
@@ -332,18 +328,14 @@ const CleaningPanel: React.FC<CleaningPanelProps> = ({
 
               {/* Download buttons */}
               <div className="flex flex-wrap items-center gap-3 pt-2">
-                <span className="text-sm font-medium text-gray-700">Download as:</span>
+                <span className="text-xs font-medium text-slate-600">Download as:</span>
                 {(['csv', 'parquet', 'excel'] as const).map((fmt) => (
                   <button
                     key={fmt}
                     onClick={() => { setDownloadFormat(fmt); setTimeout(handleDownload, 50); }}
-                    className="px-5 py-2.5 rounded-xl text-sm font-semibold border-2 transition-all hover:shadow-md capitalize"
-                    style={{
-                      borderColor: fmt === 'csv' ? '#10b981' : fmt === 'parquet' ? '#6366f1' : '#f59e0b',
-                      color: fmt === 'csv' ? '#10b981' : fmt === 'parquet' ? '#6366f1' : '#f59e0b',
-                    }}
+                    className="px-4 py-2 rounded-lg text-xs font-semibold border border-slate-200 text-slate-700 hover:border-indigo-300 hover:text-indigo-600 transition-all capitalize"
                   >
-                    Download {fmt.toUpperCase()}
+                    {fmt.toUpperCase()}
                   </button>
                 ))}
               </div>
@@ -354,18 +346,14 @@ const CleaningPanel: React.FC<CleaningPanelProps> = ({
         {/* Download buttons when dataset is cleaned but stats aren't loaded */}
         {isCleaned && !cleaningStats && (
           <div className="flex flex-wrap items-center gap-3 pt-2">
-            <span className="text-sm font-medium text-gray-700">Download cleaned file:</span>
+            <span className="text-xs font-medium text-slate-600">Download cleaned file:</span>
             {(['csv', 'parquet', 'excel'] as const).map((fmt) => (
               <button
                 key={fmt}
                 onClick={() => { setDownloadFormat(fmt); setTimeout(handleDownload, 50); }}
-                className="px-5 py-2.5 rounded-xl text-sm font-semibold border-2 transition-all hover:shadow-md capitalize"
-                style={{
-                  borderColor: fmt === 'csv' ? '#10b981' : fmt === 'parquet' ? '#6366f1' : '#f59e0b',
-                  color: fmt === 'csv' ? '#10b981' : fmt === 'parquet' ? '#6366f1' : '#f59e0b',
-                }}
+                className="px-4 py-2 rounded-lg text-xs font-semibold border border-slate-200 text-slate-700 hover:border-indigo-300 hover:text-indigo-600 transition-all capitalize"
               >
-                Download {fmt.toUpperCase()}
+                {fmt.toUpperCase()}
               </button>
             ))}
           </div>
@@ -409,31 +397,35 @@ interface ToggleOptionProps {
   onChange: (v: boolean) => void;
 }
 const ToggleOption: React.FC<ToggleOptionProps> = ({ label, description, checked, onChange }) => (
-  <label className="flex items-start gap-4 cursor-pointer group p-4 rounded-xl border border-gray-200 hover:border-emerald-300 transition-all">
+  <label className="flex items-start gap-4 cursor-pointer group p-4 rounded-xl border border-slate-100 hover:border-indigo-200 transition-all">
     <div className="mt-0.5 flex-shrink-0">
       <div
         onClick={() => onChange(!checked)}
-        className={`w-11 h-6 rounded-full transition-colors duration-200 relative ${
-          checked ? 'bg-emerald-500' : 'bg-gray-300'
+        className={`w-10 h-5 rounded-full transition-colors duration-200 relative ${
+          checked ? 'bg-indigo-500' : 'bg-slate-200'
         }`}
       >
-        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${
-          checked ? 'translate-x-6' : 'translate-x-1'
+        <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${
+          checked ? 'translate-x-5' : 'translate-x-0.5'
         }`} />
       </div>
     </div>
     <div>
-      <p className="text-sm font-semibold text-gray-800">{label}</p>
-      <p className="text-xs text-gray-500 mt-0.5">{description}</p>
+      <p className="text-sm font-medium text-slate-800">{label}</p>
+      <p className="text-xs text-slate-400 mt-0.5">{description}</p>
     </div>
   </label>
 );
 
 interface StatBoxProps { label: string; value: any; highlight?: boolean; }
 const StatBox: React.FC<StatBoxProps> = ({ label, value, highlight }) => (
-  <div className={`rounded-xl p-4 text-center ${highlight && Number(value) > 0 ? 'bg-orange-50 border border-orange-200' : 'bg-gray-50'}`}>
-    <p className="text-xs text-gray-500 uppercase tracking-wide">{label}</p>
-    <p className={`text-xl font-bold mt-1 ${highlight && Number(value) > 0 ? 'text-orange-600' : 'text-gray-800'}`}>{value}</p>
+  <div className={`rounded-xl p-4 text-center border ${
+    highlight && Number(value) > 0 ? 'bg-orange-50 border-orange-200' : 'bg-slate-50 border-slate-100'
+  }`}>
+    <p className="text-xs text-slate-400 uppercase tracking-wide">{label}</p>
+    <p className={`text-xl font-bold mt-1 tabular-nums ${
+      highlight && Number(value) > 0 ? 'text-orange-600' : 'text-slate-800'
+    }`}>{value}</p>
   </div>
 );
 

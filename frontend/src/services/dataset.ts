@@ -42,6 +42,9 @@ export interface DatasetInsight {
   columns?: Array<{ name: string; dtype?: string; null_percentage?: number; unique_count?: number; is_categorical?: boolean }>;
   imbalance_warnings?: Array<{ column: string; severity: string; imbalance_ratio?: number; message: string }>;
   recommendations?: string[];
+  domain?: string;
+  domain_icon?: string;
+  suitable_for?: Array<{ type: string; icon: string; confidence: string }>;
 }
 
 export interface DatasetPreview {

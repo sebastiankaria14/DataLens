@@ -51,21 +51,38 @@ def handle_missing_values(
         series = out[col]
         if series.null_count() == 0:
             continue
+        is_numeric = series.dtype in numeric_dtypes
         fill_expr = None
-        if strategy == "fill_mean" and series.dtype in numeric_dtypes:
-            mean_val = series.mean()
-            if mean_val is not None:
-                fill_expr = pl.col(col).fill_null(mean_val)
-        elif strategy == "fill_median" and series.dtype in numeric_dtypes:
-            median_val = series.median()
-            if median_val is not None:
-                fill_expr = pl.col(col).fill_null(median_val)
+        if strategy == "fill_mean":
+            if is_numeric:
+                mean_val = series.mean()
+                if mean_val is not None:
+                    fill_expr = pl.col(col).fill_null(mean_val)
+            else:
+                # Fall back to mode for non-numeric columns
+                mode_series = series.drop_nulls().mode()
+                if len(mode_series) > 0:
+                    fill_expr = pl.col(col).fill_null(mode_series[0])
+        elif strategy == "fill_median":
+            if is_numeric:
+                median_val = series.median()
+                if median_val is not None:
+                    fill_expr = pl.col(col).fill_null(median_val)
+            else:
+                # Fall back to mode for non-numeric columns
+                mode_series = series.drop_nulls().mode()
+                if len(mode_series) > 0:
+                    fill_expr = pl.col(col).fill_null(mode_series[0])
         elif strategy == "fill_mode":
             mode_series = series.drop_nulls().mode()
             if len(mode_series) > 0:
                 fill_expr = pl.col(col).fill_null(mode_series[0])
-        elif strategy == "fill_zero" and series.dtype in numeric_dtypes:
-            fill_expr = pl.col(col).fill_null(0)
+        elif strategy == "fill_zero":
+            if is_numeric:
+                fill_expr = pl.col(col).fill_null(0)
+            else:
+                # Fall back to empty string for non-numeric columns
+                fill_expr = pl.col(col).fill_null("")
         elif strategy == "fill_empty":
             fill_expr = pl.col(col).fill_null("")
         if fill_expr is not None:
@@ -320,7 +337,19 @@ def clean_dataset_pipeline(
     # 3. Handle missing values
     strat_map = options.get("missing_strategy_map") or {}
     global_missing = options.get("handle_missing")
-    if global_missing and not strat_map:
+
+    # "auto" strategy: fill_mean for numeric columns, fill_mode for everything else
+    if global_missing == "auto" and not strat_map:
+        numeric_dtypes_pl = (
+            pl.Int8, pl.Int16, pl.Int32, pl.Int64,
+            pl.UInt8, pl.UInt16, pl.UInt32, pl.UInt64,
+            pl.Float32, pl.Float64,
+        )
+        strat_map = {
+            col: ("fill_mean" if df[col].dtype in numeric_dtypes_pl else "fill_mode")
+            for col in df.columns
+        }
+    elif global_missing and not strat_map:
         strat_map = {"__all__": global_missing}
     if strat_map:
         df, s = handle_missing_values(df, strat_map)

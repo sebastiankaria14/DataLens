@@ -82,19 +82,53 @@ const DatasetOverview: React.FC<DatasetOverviewProps> = ({ insight, isLoading })
     >
       <div className="flex items-start justify-between gap-6">
         <div className="flex-1">
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">🧠 Dataset Overview</h2>
-          {insight.ai_description && (
-            <div className="mb-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
-              <div className="flex items-start gap-2">
-                <span className="text-lg mt-0.5">✨</span>
+          <h2 className="text-lg font-semibold text-slate-900 tracking-tight mb-3">Dataset Overview</h2>
+
+          {/* Domain + ML project type banner */}
+          {(insight.domain || (insight.suitable_for && insight.suitable_for.length > 0)) && (
+            <div className="mb-4 p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-wrap items-start gap-4">
+              {insight.domain && insight.domain !== 'General' && (
                 <div>
-                  <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">AI Description</span>
-                  <p className="text-gray-800 text-sm leading-relaxed mt-1">{insight.ai_description}</p>
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1.5">Domain</p>
+                  <span className="badge badge-indigo text-sm font-semibold px-3 py-1">
+                    {insight.domain_icon} {insight.domain}
+                  </span>
+                </div>
+              )}
+              {insight.suitable_for && insight.suitable_for.length > 0 && (
+                <div>
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1.5">Suitable For</p>
+                  <div className="flex flex-wrap gap-2">
+                    {insight.suitable_for.map((sf, i) => (
+                      <span
+                        key={i}
+                        title={`Confidence: ${sf.confidence}`}
+                        className={`badge text-sm px-3 py-1 ${
+                          sf.confidence === 'High'
+                            ? 'badge-green'
+                            : 'badge-yellow'
+                        }`}
+                      >
+                        {sf.icon} {sf.type}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {insight.ai_description && (
+            <div className="mb-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+              <div className="flex items-start gap-2.5">
+                <div>
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Summary</span>
+                  <p className="text-slate-700 text-sm leading-relaxed mt-1">{insight.ai_description}</p>
                 </div>
               </div>
             </div>
           )}
-          <p className="text-gray-700 leading-relaxed mb-4">{insight.summary}</p>
+          <p className="text-slate-600 text-sm leading-relaxed mb-4">{insight.summary}</p>
 
           <div className="flex flex-wrap gap-2 mb-4">
             {insights.slice(0, 3).map((ins, idx) => (
@@ -103,7 +137,7 @@ const DatasetOverview: React.FC<DatasetOverviewProps> = ({ insight, isLoading })
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.3 + idx * 0.1 }}
-                className="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-blue-800 text-sm font-medium border border-blue-200"
+                className="badge badge-blue"
               >
                 {ins}
               </motion.span>
@@ -112,12 +146,12 @@ const DatasetOverview: React.FC<DatasetOverviewProps> = ({ insight, isLoading })
 
           {insight.recommendations && insight.recommendations.length > 0 && (
             <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Recommendations</h3>
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Recommendations</h3>
               <div className="flex flex-wrap gap-2">
                 {insight.recommendations.slice(0, 3).map((rec, idx) => (
                   <span
                     key={idx}
-                    className="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 text-gray-800 text-xs border border-gray-300"
+                    className="badge badge-gray text-[11px] leading-snug"
                   >
                     {rec}
                   </span>

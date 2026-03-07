@@ -99,17 +99,17 @@ const UploadDataset: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       {/* Navbar */}
-      <nav className="bg-white shadow-sm border-b border-gray-200">
+      <nav className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <button onClick={() => navigate('/')} className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">DF</span>
+                <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">DF</span>
                 </div>
-                <span className="text-xl font-bold text-gray-900">DataForge</span>
+                <span className="text-xl font-bold text-slate-900">DataForge</span>
               </button>
             </div>
           </div>
@@ -118,8 +118,8 @@ const UploadDataset: React.FC = () => {
       
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Upload Dataset</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Upload Dataset</h1>
+          <p className="mt-1 text-sm text-slate-500">
             Upload your raw dataset for profiling and cleaning
           </p>
         </div>
@@ -128,10 +128,10 @@ const UploadDataset: React.FC = () => {
         <div className="card">
           {/* File Drop Zone */}
           <div
-            className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
+            className={`border-2 border-dashed rounded-xl p-10 text-center transition-colors cursor-pointer ${
               dragActive
-                ? 'border-primary-500 bg-primary-50'
-                : 'border-gray-300 hover:border-gray-400'
+                ? 'border-indigo-400 bg-indigo-50'
+                : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50'
             }`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
@@ -139,7 +139,7 @@ const UploadDataset: React.FC = () => {
             onDrop={handleDrop}
           >
             <svg
-              className="mx-auto h-12 w-12 text-gray-400"
+              className="mx-auto h-10 w-10 text-slate-300"
               stroke="currentColor"
               fill="none"
               viewBox="0 0 48 48"
@@ -153,7 +153,7 @@ const UploadDataset: React.FC = () => {
             </svg>
             <div className="mt-4">
               <label htmlFor="file-upload" className="cursor-pointer">
-                <span className="text-primary-600 hover:text-primary-700 font-medium">
+                <span className="text-indigo-600 hover:text-indigo-700 font-medium">
                   Upload a file
                 </span>
                 <input
@@ -167,24 +167,24 @@ const UploadDataset: React.FC = () => {
               </label>
               <span className="text-gray-600"> or drag and drop</span>
             </div>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-slate-400 mt-2">
               CSV, Excel, or JSON files up to 500MB
             </p>
           </div>
 
           {/* Selected File Info */}
           {selectedFile && (
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+            <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                    <svg className="w-5 h-5 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="w-9 h-9 bg-indigo-50 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
                     </svg>
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">{selectedFile.name}</p>
-                    <p className="text-sm text-gray-500">{formatFileSize(selectedFile.size)}</p>
+                    <p className="font-medium text-slate-900 text-sm">{selectedFile.name}</p>
+                    <p className="text-xs text-slate-400">{formatFileSize(selectedFile.size)}</p>
                   </div>
                 </div>
                 <button
@@ -202,13 +202,13 @@ const UploadDataset: React.FC = () => {
           {/* Upload Progress */}
           {isUploading && uploadProgress > 0 && (
             <div className="mt-4">
-              <div className="flex justify-between text-sm text-gray-600 mb-2">
+              <div className="flex justify-between text-xs text-slate-500 mb-1.5">
                 <span>Uploading...</span>
                 <span>{uploadProgress}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div className="w-full bg-slate-100 rounded-full h-1.5">
                 <div 
-                  className="bg-primary-600 h-2.5 rounded-full transition-all duration-300" 
+                  className="bg-indigo-500 h-1.5 rounded-full transition-all duration-300" 
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
@@ -217,7 +217,7 @@ const UploadDataset: React.FC = () => {
 
           {/* Error Message */}
           {error && (
-            <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
               {error}
             </div>
           )}
@@ -225,7 +225,7 @@ const UploadDataset: React.FC = () => {
           {/* Success Message */}
           {success && (
             <div className="mt-4">
-              <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
+              <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-xl text-sm">
                 {success}
               </div>
 
@@ -263,33 +263,20 @@ const UploadDataset: React.FC = () => {
         </div>
 
         {/* Info Section */}
-        <div className="mt-8 card bg-blue-50 border border-blue-200">
-          <h3 className="font-semibold text-gray-900 mb-2">What happens next?</h3>
-          <ul className="space-y-2 text-sm text-gray-700">
-            <li className="flex items-start">
-              <svg className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              Your file will be converted to Parquet format for efficient processing
-            </li>
-            <li className="flex items-start">
-              <svg className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              DuckDB will automatically profile your dataset (schema, statistics, distributions)
-            </li>
-            <li className="flex items-start">
-              <svg className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              You'll see insights on missing values, outliers, and categorical distributions
-            </li>
-            <li className="flex items-start">
-              <svg className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              Large files are processed in chunks - no memory issues!
-            </li>
+        <div className="mt-6 card bg-slate-50 border border-slate-100">
+          <h3 className="text-sm font-semibold text-slate-900 mb-3">What happens next?</h3>
+          <ul className="space-y-2">
+            {[
+              'Your file is converted to Parquet for efficient processing',
+              'DuckDB automatically profiles schema, statistics, and distributions',
+              'Missing values, outliers, and categorical columns are detected',
+              'Large files are processed in chunks — no memory issues',
+            ].map((item) => (
+              <li key={item} className="flex items-start gap-2.5 text-xs text-slate-500">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 flex-shrink-0 mt-1" />
+                {item}
+              </li>
+            ))}
           </ul>
         </div>
       </div>

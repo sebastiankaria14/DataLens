@@ -229,6 +229,10 @@ def _build_insights(dataset: Dataset) -> Dict[str, Any]:
     # AI description removed to avoid blocking LLM call - moved to separate endpoint
     ai_description = f"Dataset with {row_count:,} rows and {column_count} columns ready for analysis."
 
+    domain = profile.get("domain", "General")
+    domain_icon = profile.get("domain_icon", "📊")
+    suitable_for = profile.get("suitable_for") or []
+
     return {
         "summary": " ".join(summary_parts),
         "ai_description": ai_description,
@@ -240,6 +244,9 @@ def _build_insights(dataset: Dataset) -> Dict[str, Any]:
         "columns": columns_summary,
         "imbalance_warnings": imbalance_warnings,
         "recommendations": recommendations,
+        "domain": domain,
+        "domain_icon": domain_icon,
+        "suitable_for": suitable_for,
     }
 
 

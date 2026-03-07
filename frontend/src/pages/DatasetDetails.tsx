@@ -273,7 +273,7 @@ const DatasetDetails: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-slate-50">
       <DatasetHeader dataset={dataset} isLoading={isLoading} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -300,19 +300,19 @@ const DatasetDetails: React.FC = () => {
 
         {/* Status banners */}
         {isProfiling && (
-          <div className="bg-blue-50 border border-blue-200 text-blue-900 px-6 py-4 rounded-xl shadow-sm">
+          <div className="bg-slate-50 border border-slate-200 text-slate-700 px-6 py-4 rounded-xl">
             <div className="flex items-center space-x-3">
-              <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-              <span>Profiling in progress — updates every {POLL_MS / 1000}s.</span>
+              <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+              <span className="text-sm font-medium">Profiling in progress — updates every {POLL_MS / 1000}s.</span>
             </div>
           </div>
         )}
 
         {isCleaning && (
-          <div className="bg-emerald-50 border border-emerald-200 text-emerald-900 px-6 py-4 rounded-xl shadow-sm">
+          <div className="bg-slate-50 border border-slate-200 text-slate-700 px-6 py-4 rounded-xl">
             <div className="flex items-center space-x-3">
-              <div className="w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
-              <span>Cleaning in progress — this page will refresh automatically.</span>
+              <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+              <span className="text-sm font-medium">Cleaning in progress — this page will refresh automatically.</span>
             </div>
           </div>
         )}
@@ -323,24 +323,23 @@ const DatasetDetails: React.FC = () => {
             <DatasetOverview insight={insight} isLoading={!insight} />
 
             {/* Section tab bar */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200">
+            <div className="bg-white rounded-xl border border-slate-200">
               <div className="flex overflow-x-auto">
                 {([
-                  { key: 'profile', label: 'Profile & Explore', icon: '📊' },
-                  { key: 'clean', label: 'Clean Dataset', icon: '🧹' },
-                  { key: 'ml', label: 'ML Preparation', icon: '🤖' },
-                ] as { key: Section; label: string; icon: string }[]).map((tab) => (
+                  { key: 'profile', label: 'Profile & Explore' },
+                  { key: 'clean',   label: 'Clean Dataset' },
+                  { key: 'ml',      label: 'ML Preparation' },
+                ] as { key: Section; label: string }[]).map((tab) => (
                   <button
                     key={tab.key}
                     onClick={() => setActiveSection(tab.key)}
-                    className={`flex-1 min-w-[140px] px-6 py-4 text-sm font-semibold transition-all whitespace-nowrap flex items-center justify-center gap-2 ${
+                    className={`flex-1 min-w-[140px] px-6 py-4 text-sm font-semibold transition-all whitespace-nowrap ${
                       activeSection === tab.key
-                        ? 'border-b-2 border-blue-500 text-blue-600 bg-blue-50'
-                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                        ? 'border-b-2 border-indigo-500 text-indigo-600 bg-indigo-50'
+                        : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
                     }`}
                   >
-                    <span>{tab.icon}</span>
-                    <span>{tab.label}</span>
+                    {tab.label}
                   </button>
                 ))}
               </div>

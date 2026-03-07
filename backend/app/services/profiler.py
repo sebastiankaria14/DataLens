@@ -4,6 +4,77 @@ from typing import Dict, Any, Optional, List
 from pathlib import Path
 
 
+# ---------------------------------------------------------------------------
+# Domain / ML-type keyword tables
+# ---------------------------------------------------------------------------
+_DOMAIN_KEYWORDS: Dict[str, List[str]] = {
+    "Finance / Stock Market": [
+        "price", "stock", "open", "close", "high", "low", "volume", "ticker",
+        "symbol", "market", "dividend", "return", "revenue", "profit", "loss",
+        "cost", "salary", "income", "expense", "budget", "fund", "asset",
+        "equity", "bond", "gdp", "inflation", "currency", "rate",
+    ],
+    "Healthcare / Medical": [
+        "patient", "diagnosis", "disease", "treatment", "hospital", "doctor",
+        "age", "bmi", "blood", "glucose", "cholesterol", "symptom",
+        "prescription", "health", "medical", "clinical", "drug", "dose",
+        "mortality", "survival", "cancer", "heart", "pressure",
+    ],
+    "Sports / Athletics": [
+        "player", "team", "goal", "score", "match", "season", "league",
+        "win", "loss", "draw", "assist", "position", "club", "points",
+        "rank", "game", "sport", "athlete", "tournament", "fixture",
+        "appearance", "minute", "assist", "striker", "defender",
+    ],
+    "E-commerce / Retail": [
+        "product", "sale", "order", "customer", "quantity", "discount",
+        "category", "rating", "review", "shipping", "inventory", "purchase",
+        "cart", "checkout", "item", "sku", "brand", "store",
+    ],
+    "Human Resources": [
+        "employee", "staff", "department", "role", "hire", "schedule",
+        "attendance", "performance", "leave", "job", "work", "shift",
+        "present", "absent", "service", "designation",
+    ],
+    "Transportation / Logistics": [
+        "trip", "route", "departure", "arrival", "distance", "duration",
+        "vehicle", "flight", "passenger", "origin", "destination", "delay",
+        "freight", "carrier", "tracking", "shipment",
+    ],
+    "Education": [
+        "student", "grade", "course", "teacher", "school", "score",
+        "exam", "subject", "attendance", "lecture", "marks", "class",
+        "gpa", "semester",
+    ],
+    "Climate / Environment": [
+        "temperature", "humidity", "wind", "rain", "precipitation",
+        "weather", "climate", "air", "pollution", "carbon", "sensor",
+        "pressure", "visibility", "uv",
+    ],
+    "Social Media / NLP": [
+        "text", "tweet", "post", "comment", "message", "sentiment",
+        "review", "content", "likes", "followers", "mention", "hashtag",
+    ],
+}
+
+_DOMAIN_ICONS: Dict[str, str] = {
+    "Finance / Stock Market": "💹",
+    "Healthcare / Medical": "🏥",
+    "Sports / Athletics": "⚽",
+    "E-commerce / Retail": "🛒",
+    "Human Resources": "👥",
+    "Transportation / Logistics": "✈️",
+    "Education": "🎓",
+    "Climate / Environment": "🌍",
+    "Social Media / NLP": "💬",
+}
+
+_NUMERIC_MARKERS = ("INT", "DOUBLE", "FLOAT", "DECIMAL", "REAL", "NUMERIC", "BIGINT", "SMALLINT")
+_TEXT_MARKERS = ("VARCHAR", "CHAR", "TEXT", "STRING")
+_TIME_KEYWORDS = ["date", "time", "year", "month", "week", "day", "timestamp", "period", "quarter"]
+_NLP_KEYWORDS = ["text", "comment", "review", "message", "tweet", "post", "description", "content", "sentence", "body"]
+
+
 class DataProfiler:
     """Service for profiling datasets using DuckDB."""
     
@@ -80,7 +151,13 @@ class DataProfiler:
         
         # Detect imbalanced categories
         imbalance_warnings = self._detect_imbalance(category_distributions, row_count)
-        
+
+        # Classify dataset domain and suggest ML project types
+        classification = self._classify_dataset(
+            column_names=[col[0] for col in columns_info],
+            data_types={col[0]: col[1] for col in columns_info},
+        )
+
         conn.close()
         
         return {
@@ -93,7 +170,10 @@ class DataProfiler:
             "quality_score": quality_score,
             "data_types": {col[0]: col[1] for col in columns_info},
             "category_distributions": category_distributions,
-            "imbalance_warnings": imbalance_warnings
+            "imbalance_warnings": imbalance_warnings,
+            "domain": classification["domain"],
+            "domain_icon": classification["domain_icon"],
+            "suitable_for": classification["suitable_for"],
         }
     
     def _analyze_column_duckdb(
@@ -257,6 +337,62 @@ class DataProfiler:
         score = 100 - missing_penalty - duplicate_penalty
         
         return max(0.0, min(100.0, round(score, 2)))
+
+
+    def _classify_dataset(
+        self, column_names: List[str], data_types: Dict[str, str]
+    ) -> Dict[str, Any]:
+        """Infer dataset domain and suggest ML project types from column names and types."""
+        cols_lower = [c.lower() for c in column_names]
+        types_upper = [t.upper() for t in data_types.values()]
+        total_cols = len(column_names)
+
+        # Count column flavours
+        num_numeric = sum(1 for t in types_upper if any(m in t for m in _NUMERIC_MARKERS))
+        num_text = sum(1 for t in types_upper if any(m in t for m in _TEXT_MARKERS))
+        numeric_ratio = num_numeric / total_cols if total_cols else 0
+
+        # Domain detection: score each domain by keyword hits
+        best_score, best_domain = 0, "General"
+        for domain_name, keywords in _DOMAIN_KEYWORDS.items():
+            score = sum(1 for kw in keywords if any(kw in col for col in cols_lower))
+            if score > best_score:
+                best_score, best_domain = score, domain_name
+
+        domain = best_domain if best_score > 0 else "General"
+        domain_icon = _DOMAIN_ICONS.get(domain, "📊")
+
+        # ML project type suggestions
+        suitable_for = []
+
+        has_time = any(kw in col for kw in _TIME_KEYWORDS for col in cols_lower)
+        has_nlp = any(kw in col for kw in _NLP_KEYWORDS for col in cols_lower)
+
+        if has_time and num_numeric > 0:
+            suitable_for.append({"type": "Time Series Forecasting", "icon": "📈", "confidence": "High"})
+
+        if has_nlp:
+            suitable_for.append({"type": "NLP / Text Analysis", "icon": "💬", "confidence": "High"})
+
+        if num_numeric > 0 and numeric_ratio >= 0.4:
+            suitable_for.append({"type": "Regression", "icon": "📉", "confidence": "High"})
+
+        if num_text > 0 and num_numeric > 0:
+            suitable_for.append({"type": "Classification", "icon": "🏷️", "confidence": "High"})
+        elif num_numeric > 0:
+            suitable_for.append({"type": "Classification", "icon": "🏷️", "confidence": "Medium"})
+
+        if num_numeric >= 3:
+            suitable_for.append({"type": "Clustering", "icon": "🔵", "confidence": "Medium"})
+
+        if not suitable_for:
+            suitable_for.append({"type": "Exploratory Data Analysis", "icon": "🔍", "confidence": "Medium"})
+
+        return {
+            "domain": domain,
+            "domain_icon": domain_icon,
+            "suitable_for": suitable_for[:4],
+        }
 
 
 # Singleton instance
