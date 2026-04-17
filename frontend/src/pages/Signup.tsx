@@ -62,9 +62,9 @@ const Signup: React.FC = () => {
         <div>
           <div className="flex items-center space-x-2.5">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">DF</span>
+              <span className="text-white font-bold text-sm">DL</span>
             </div>
-            <span className="text-white font-semibold text-lg">DataForge</span>
+            <span className="text-white font-semibold text-lg">DataLens</span>
           </div>
         </div>
 
@@ -87,7 +87,7 @@ const Signup: React.FC = () => {
         </div>
 
         <p className="text-slate-600 text-xs">
-          &copy; {new Date().getFullYear()} DataForge
+          &copy; {new Date().getFullYear()} DataLens
         </p>
       </div>
 
@@ -102,9 +102,9 @@ const Signup: React.FC = () => {
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center space-x-2 mb-8">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">DF</span>
+              <span className="text-white font-bold text-sm">DL</span>
             </div>
-            <span className="text-slate-900 font-semibold text-lg">DataForge</span>
+            <span className="text-slate-900 font-semibold text-lg">DataLens</span>
           </div>
 
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Create your account</h1>

@@ -41,7 +41,7 @@ const MLPanel: React.FC<MLPanelProps> = ({ datasetId, datasetStatus, onPrepareCo
     } finally {
       setLoading(false);
     }
-  };
+  }; //fuck jahnvi
 
   useEffect(() => {
     loadAnalysis();
@@ -241,23 +241,38 @@ const MLPanel: React.FC<MLPanelProps> = ({ datasetId, datasetStatus, onPrepareCo
                   </p>
                 </div>
                 <div className="space-y-3">
-                  {mlData.model_recommendations.models.map((model, i) => (
-                    <div
-                      key={i}
-                      className="border border-gray-200 rounded-xl p-5 hover:border-purple-300 hover:shadow-sm transition-all"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h4 className="font-semibold text-gray-900">{model.name}</h4>
-                          <code className="text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded mt-1 inline-block">
-                            {model.library}
-                          </code>
+                  {mlData.model_recommendations.models.map((model: any, i: number) => {
+                    const isTop = model.recommended === true;
+                    return (
+                      <div
+                        key={i}
+                        className={`rounded-xl p-5 transition-all ${
+                          isTop
+                            ? 'border-2 border-purple-400 bg-purple-50 shadow-sm'
+                            : 'border border-gray-200 hover:border-purple-200 hover:shadow-sm'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h4 className="font-semibold text-gray-900">{model.name}</h4>
+                              {isTop && (
+                                <span className="text-xs font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full whitespace-nowrap">
+                                  ⭐ Recommended
+                                </span>
+                              )}
+                            </div>
+                            <code className="text-xs text-purple-600 bg-white border border-purple-100 px-2 py-0.5 rounded mt-1.5 inline-block">
+                              {model.library}
+                            </code>
+                          </div>
                         </div>
-                        <span className="text-lg">{i === 0 ? '⭐' : ''}</span>
+                        <p className={`text-sm mt-2 ${isTop ? 'text-purple-900 font-medium' : 'text-gray-500'}`}>
+                          {model.notes}
+                        </p>
                       </div>
-                      <p className="text-sm text-gray-500 mt-2">{model.notes}</p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </motion.div>
             )}

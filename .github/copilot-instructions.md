@@ -1,6 +1,6 @@
-# DataForge Copilot Guide
+# DataLens Copilot Guide
 - Architecture: FastAPI backend + React/Vite frontend. Back end entrypoint [backend/app/main.py](backend/app/main.py) wires auth + datasets routers and uses a CORS regex that only allows localhost origins; default `allow_origins` list is empty because `allow_origin_regex` is used.
-- Config: Settings come from [backend/app/core/config.py](backend/app/core/config.py) via pydantic-settings; `.env` lives in `backend/.env`. Defaults point SQLite to `dataforge.db` in repo root and store files under `backend/uploads` and `backend/processed`.
+- Config: Settings come from [backend/app/core/config.py](backend/app/core/config.py) via pydantic-settings; `.env` lives in `backend/.env`. Defaults point SQLite to `datalens.db` and store files under `backend/uploads` and `backend/processed`.
 - Database: SQLAlchemy models in [backend/app/models](backend/app/models) with metadata-only tables (`users`, `datasets`). Tables are auto-created at startup in `lifespan`.
 - Auth: JWT utilities in [backend/app/core/security.py](backend/app/core/security.py) use PBKDF2 (not bcrypt) and jose. OAuth2 password flow token URL is `/api/auth/login`. Endpoints in [backend/app/routers/auth.py](backend/app/routers/auth.py) accept both form and JSON login; signup immediately logs in via frontend. Use `Authorization: Bearer <token>`.
 - Auth dependencies: [backend/app/core/dependencies.py](backend/app/core/dependencies.py) pulls the user from the JWT `sub` email and ensures `is_active`.
@@ -14,8 +14,8 @@
 - Dataset UX: Upload UI in [frontend/src/pages/UploadDataset.tsx](frontend/src/pages/UploadDataset.tsx) posts `FormData` to `/api/datasets/upload`, shows background profiling note, and links to the dataset detail view. Dataset detail view in [frontend/src/pages/DatasetDetails.tsx](frontend/src/pages/DatasetDetails.tsx) polls every 2s until status is profiled/cleaned and then fetches `/profile`; it renders quality score, duplicates, memory estimate, columns table, and imbalance warnings.
 - Routing: App routes are defined in [frontend/src/App.tsx](frontend/src/App.tsx); dashboard is currently mostly static copy, while upload and dataset details call the API.
 - Environment files: `backend/.env` (required for SECRET_KEY, DATABASE_URL, dirs); `backend/.env.example` and `frontend/.env.example` are present. Frontend fallback works without `.env` but uses `http://localhost:8000` by default.
-- Running backend (PowerShell, repo root): `Set-Location "c:/Users/sebastian/OneDrive/Desktop/dataforge/backend"; C:/Users/sebastian/OneDrive/Desktop/dataforge/.venv/Scripts/python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload`. Start after installing requirements; tables auto-create.
-- Running frontend (PowerShell, repo root): `Set-Location "c:/Users/sebastian/OneDrive/Desktop/dataforge/frontend"; npm install; npm run dev -- --host --port 5173`.
+- Running backend (PowerShell, repo root): `Set-Location "backend"; ..\.venv\Scripts\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload`. Start after installing requirements; tables auto-create.
+- Running frontend (PowerShell, repo root): `Set-Location "frontend"; npm install; npm run dev -- --host --port 5173`.
 - HTTP sanity checks: `GET /health`, `GET /` for version message, Swagger at `/docs`, ReDoc at `/redoc`.
 - File paths in DB/API responses may be absolute; the API serves downloads from disk via `FileResponse` in datasets router.
 - Common pitfalls: missing `pydantic-settings` (added to requirements), SECRET_KEY must be set, CORS only allows localhost, and uvicorn reload uses WatchFiles so ensure working directory is `backend/` when starting.

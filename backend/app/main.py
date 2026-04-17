@@ -23,8 +23,8 @@ async def lifespan(app: FastAPI):
 
 # Create FastAPI application
 app = FastAPI(
-    title="DataForge API",
-    description="ML Dataset Preparation & Cleaning Platform",
+    title="DataLens API",
+    description="Dataset Analysis, Preparation & Cleaning Platform",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -51,7 +51,7 @@ app.include_router(chat_router)
 async def root():
     """Root endpoint."""
     return {
-        "message": "DataForge API",
+        "message": "DataLens API",
         "version": "1.0.0",
         "docs": "/docs"
     }

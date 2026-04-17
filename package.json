@@ -1,11 +1,11 @@
 {
-  "name": "dataforge",
+  "name": "datalens",
   "version": "1.0.0",
-  "description": "DataForge - AI-powered data processing platform",
+  "description": "DataLens - AI-powered data analysis platform",
   "private": true,
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" --names \"backend,frontend\" --prefix-colors \"blue,green\"",
-    "dev:backend": "cd backend && C:/Users/sebastian/OneDrive/Desktop/dataforge/.venv/Scripts/python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload",
+    "dev:backend": "cd backend && ..\\.venv\\Scripts\\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload",
     "dev:frontend": "cd frontend && npm run dev",
     "install:frontend": "cd frontend && npm install",
     "install:backend": "cd backend && pip install -r requirements.txt"
@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/sebastiankaria14/DataForge.git"
+    "url": "https://github.com/sebastiankaria14/DataLens.git"
   },
   "author": "Sebastian Karia",
   "license": "MIT"

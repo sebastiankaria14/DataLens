@@ -1,5 +1,5 @@
 ﻿<div align="center">
-  <h1>DataForge</h1>
+  <h1>DataLens</h1>
   <p><strong>Production-grade dataset preparation platform for machine learning.</strong><br/>
   Profile, clean, visualize, and export ML-ready data — without ever loading it into memory.</p>
 
@@ -18,7 +18,7 @@
 
 ## Overview
 
-DataForge is a full-stack web application built for data scientists and ML engineers who need to go from raw files to clean, ML-ready datasets as fast as possible.
+DataLens is a full-stack web application built for data scientists and ML engineers who need to go from raw files to clean, ML-ready datasets as fast as possible.
 
 It leverages **DuckDB** for embedded zero-copy analytics and **Polars** for high-performance data transformations — meaning files are queried directly from disk with no in-memory loading, making it practical even for large datasets.
 
@@ -188,8 +188,8 @@ Upload ? Auto-Profile ? Visualize ? Clean ? Export
 ### 1. Clone
 
 ```bash
-git clone https://github.com/yourusername/dataforge.git
-cd dataforge
+git clone https://github.com/yourusername/datalens.git
+cd datalens
 ```
 
 ### 2. Backend
@@ -249,7 +249,7 @@ ollama serve
 ```env
 # Required
 SECRET_KEY=<generate with: openssl rand -hex 32>
-DATABASE_URL=sqlite:///./dataforge.db
+DATABASE_URL=sqlite:///./datalens.db
 
 # File storage
 UPLOAD_DIR=uploads
@@ -268,7 +268,7 @@ openssl rand -hex 32
 
 **PostgreSQL (production):**
 ```env
-DATABASE_URL=postgresql://user:password@localhost:5432/dataforge
+DATABASE_URL=postgresql://user:password@localhost:5432/datalens
 ```
 
 ### Frontend — `frontend/.env`
@@ -326,7 +326,7 @@ Full interactive documentation is available at `/docs` when the backend is runni
 ## Project Structure
 
 ```
-dataforge/
+datalens/
 +-- backend/
 ¦   +-- app/
 ¦   ¦   +-- main.py                  # FastAPI app, lifespan, CORS, router wiring
@@ -404,7 +404,7 @@ dataforge/
 
 ## Performance
 
-DataForge is architected to handle large datasets without exhausting memory.
+DataLens is architected to handle large datasets without exhausting memory.
 
 ### Backend
 

@@ -107,9 +107,9 @@ const UploadDataset: React.FC = () => {
             <div className="flex items-center">
               <button onClick={() => navigate('/')} className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">DF</span>
+                  <span className="text-white font-bold text-sm">DL</span>
                 </div>
-                <span className="text-xl font-bold text-slate-900">DataForge</span>
+                <span className="text-xl font-bold text-slate-900">DataLens</span>
               </button>
             </div>
           </div>

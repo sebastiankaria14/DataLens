@@ -72,6 +72,17 @@ export interface VisualizationData {
   stats?: VisualizationStats;
 }
 
+export interface ScatterData {
+  column1: string;
+  column2: string;
+  data: Array<{ x: number; y: number }>;
+}
+
+export interface CorrelationData {
+  columns: string[];
+  matrix: number[][];
+}
+
 export interface AIResponse {
   answer: string;
   related_columns?: string[];
@@ -238,6 +249,24 @@ class DatasetService {
     const response = await api.get<VisualizationData>(`/api/datasets/${id}/visualization`, {
       params: { column, chart_type: chartType, bins },
     });
+    return response.data;
+  }
+
+  /**
+   * Fetch sampled (x, y) pairs for two numeric columns — used for scatter plots.
+   */
+  async getScatterData(id: number, column1: string, column2: string, limit = 500): Promise<ScatterData> {
+    const response = await api.get<ScatterData>(`/api/datasets/${id}/scatter`, {
+      params: { column1, column2, limit },
+    });
+    return response.data;
+  }
+
+  /**
+   * Fetch pairwise Pearson correlation matrix for all numeric columns.
+   */
+  async getCorrelationMatrix(id: number): Promise<CorrelationData> {
+    const response = await api.get<CorrelationData>(`/api/datasets/${id}/correlation`);
     return response.data;
   }
 

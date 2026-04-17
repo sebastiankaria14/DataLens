@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.attributes import flag_modified
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel
 import aiofiles
 import duckdb
@@ -343,9 +343,8 @@ def _column_visualization(dataset: Dataset, column: str, chart_type: str = "auto
                 ).fetchone()[0] or 0
                 hist_data = [{"bin_start": float(min_val), "bin_end": float(max_val), "count": int(single_count)}]
             else:
-                # DuckDB width_bucket returns 0 for values < min and bins+1 for
-                # values == max.  Clamp bucket to [1, bins] so every row maps to
-                # a valid bin and the resulting bin_start / bin_end are correct.
+                # Use FLOOR-based bucketing for broad DuckDB version compatibility
+                # (width_bucket was added in DuckDB 0.8; older builds lack it).
                 hist_rows = conn.execute(
                     f"""
                     WITH stats AS (
@@ -353,15 +352,18 @@ def _column_visualization(dataset: Dataset, column: str, chart_type: str = "auto
                     ),
                     bucketed AS (
                         SELECT
-                            LEAST(GREATEST(width_bucket("{safe_column}", stats.min_val, stats.max_val, {bins}), 1), {bins}) AS bucket
+                            LEAST(
+                                CAST(FLOOR(CAST({bins} AS DOUBLE) * ("{safe_column}" - stats.min_val) / (stats.max_val - stats.min_val)) AS INTEGER),
+                                {bins} - 1
+                            ) AS bucket
                         FROM {scan}, stats
                         WHERE "{safe_column}" IS NOT NULL
                     )
                     SELECT
                         bucket,
                         COUNT(*) AS count,
-                        stats.min_val + ((bucket - 1) * (stats.max_val - stats.min_val) / {bins}) AS bin_start,
-                        stats.min_val + (bucket * (stats.max_val - stats.min_val) / {bins}) AS bin_end
+                        stats.min_val + (CAST(bucket AS DOUBLE) * (stats.max_val - stats.min_val) / CAST({bins} AS DOUBLE)) AS bin_start,
+                        stats.min_val + ((CAST(bucket AS DOUBLE) + 1) * (stats.max_val - stats.min_val) / CAST({bins} AS DOUBLE)) AS bin_end
                     FROM bucketed, (SELECT MIN("{safe_column}") AS min_val, MAX("{safe_column}") AS max_val FROM {scan} WHERE "{safe_column}" IS NOT NULL) stats
                     GROUP BY bucket, stats.min_val, stats.max_val
                     ORDER BY bucket
@@ -766,6 +768,113 @@ async def get_column_visualization(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Visualization failed: {str(e)}")
 
 
+@router.get("/{dataset_id}/scatter")
+async def get_scatter_data(
+    dataset_id: int,
+    column1: str,
+    column2: str,
+    limit: int = 500,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Return sampled (x, y) pairs for two numeric columns — used for scatter plots."""
+    dataset = db.query(Dataset).filter(
+        Dataset.id == dataset_id,
+        Dataset.owner_id == current_user.id
+    ).first()
+
+    if not dataset:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Dataset not found")
+
+    if not column1 or not column2:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="column1 and column2 are required")
+
+    limit = max(1, min(limit, 2000))
+    safe_col1 = column1.replace('"', '""')
+    safe_col2 = column2.replace('"', '""')
+    scan = _scan_expression(dataset.file_path, dataset.file_type)
+    conn = duckdb.connect(":memory:")
+    try:
+        rows = conn.execute(
+            f"""
+            SELECT "{safe_col1}" AS x, "{safe_col2}" AS y
+            FROM {scan}
+            WHERE "{safe_col1}" IS NOT NULL AND "{safe_col2}" IS NOT NULL
+            LIMIT {limit}
+            """
+        ).fetchall()
+        data = []
+        for r in rows:
+            try:
+                data.append({"x": float(r[0]), "y": float(r[1])})
+            except (TypeError, ValueError):
+                pass
+        return {"column1": column1, "column2": column2, "data": data}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Scatter plot failed: {str(e)}")
+    finally:
+        conn.close()
+
+
+@router.get("/{dataset_id}/correlation")
+async def get_correlation_matrix(
+    dataset_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Return pairwise Pearson correlation matrix for all numeric columns (capped at 15)."""
+    dataset = db.query(Dataset).filter(
+        Dataset.id == dataset_id,
+        Dataset.owner_id == current_user.id
+    ).first()
+
+    if not dataset:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Dataset not found")
+
+    profile = dataset.profile_data or {}
+    columns_info = profile.get("columns") or {}
+
+    numeric_cols = [
+        name for name, info in columns_info.items()
+        if _is_numeric_type(info.get("dtype") or "")
+    ]
+
+    if len(numeric_cols) < 2:
+        return {"columns": numeric_cols, "matrix": []}
+
+    if len(numeric_cols) > 15:
+        numeric_cols = numeric_cols[:15]
+
+    scan = _scan_expression(dataset.file_path, dataset.file_type)
+    conn = duckdb.connect(":memory:")
+    try:
+        n = len(numeric_cols)
+        matrix: List[List[float]] = [[0.0] * n for _ in range(n)]
+        for i in range(n):
+            matrix[i][i] = 1.0
+            for j in range(i + 1, n):
+                sc_i = numeric_cols[i].replace('"', '""')
+                sc_j = numeric_cols[j].replace('"', '""')
+                try:
+                    row = conn.execute(
+                        f'SELECT CORR("{sc_i}", "{sc_j}") FROM {scan} WHERE "{sc_i}" IS NOT NULL AND "{sc_j}" IS NOT NULL'
+                    ).fetchone()
+                    corr = float(row[0]) if row and row[0] is not None else 0.0
+                    if corr != corr:  # NaN check
+                        corr = 0.0
+                except Exception:
+                    corr = 0.0
+                matrix[i][j] = corr
+                matrix[j][i] = corr
+        return {"columns": numeric_cols, "matrix": matrix}
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Correlation failed: {str(e)}")
+    finally:
+        conn.close()
+
+
 @router.get("/{dataset_id}/insights")
 async def dataset_insights(
     dataset_id: int,
@@ -1053,7 +1162,7 @@ async def get_ml_analysis(
         if any(t in col_dtype for t in ["INT", "DOUBLE", "FLOAT", "DECIMAL"]):
             target_type = "numeric"
 
-    model_recommendations = recommend_ml_models(target_type)
+    model_recommendations = recommend_ml_models(target_type, profile)
 
     return {
         "ml_readiness": ml_readiness,

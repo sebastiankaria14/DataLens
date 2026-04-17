@@ -10,9 +10,9 @@ const Home: React.FC = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">DF</span>
+                <span className="text-white font-bold text-lg">DL</span>
               </div>
-              <span className="text-xl font-bold text-gray-900">DataForge</span>
+              <span className="text-xl font-bold text-gray-900">DataLens</span>
             </div>
             <div className="flex items-center space-x-4">
               <Link to="/login" className="text-gray-700 hover:text-primary-600 font-medium">
@@ -176,7 +176,7 @@ const Home: React.FC = () => {
             Ready to Prepare Your ML Datasets?
           </h2>
           <p className="text-xl text-primary-100 mb-8">
-            Join data scientists and ML engineers using DataForge
+            Join data scientists and ML engineers using DataLens
           </p>
           <Link to="/signup" className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-block">
             Get Started for Free
@@ -187,7 +187,7 @@ const Home: React.FC = () => {
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-400 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p>&copy; 2026 DataForge. Built for ML Engineers.</p>
+          <p>&copy; 2026 DataLens. Built for ML Engineers.</p>
         </div>
       </footer>
     </div>

@@ -76,9 +76,9 @@ const Settings: React.FC = () => {
           <div className="flex justify-between items-center h-16">
             <Link to="/dashboard" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">DF</span>
+                <span className="text-white font-bold text-lg">DL</span>
               </div>
-              <span className="text-xl font-bold text-gray-900">DataForge</span>
+              <span className="text-xl font-bold text-gray-900">DataLens</span>
             </Link>
             <button onClick={() => navigate('/dashboard')} className="btn-secondary text-sm">
               ← Back to Dashboard
@@ -91,7 +91,7 @@ const Settings: React.FC = () => {
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-          <p className="mt-1 text-gray-600">Configure your DataForge experience</p>
+          <p className="mt-1 text-gray-600">Configure your DataLens experience</p>
         </div>
 
         {saved && (

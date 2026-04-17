@@ -1,6 +1,6 @@
-# DataForge Frontend
+# DataLens Frontend
 
-React + TypeScript frontend for the DataForge ML Dataset Preparation Platform.
+React + TypeScript frontend for the DataLens dataset analysis & ML preparation platform.
 
 ## Features
 

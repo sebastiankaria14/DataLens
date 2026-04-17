@@ -17,7 +17,7 @@ const Notifications: React.FC = () => {
     {
       id: 1,
       type: 'info',
-      title: 'Welcome to DataForge!',
+      title: 'Welcome to DataLens!',
       message: 'Your account is ready. Start by uploading your first dataset to explore profiling, cleaning, and visualization features.',
       time: 'Just now',
       read: false,
@@ -26,7 +26,7 @@ const Notifications: React.FC = () => {
       id: 2,
       type: 'info',
       title: 'Tip: Supported Formats',
-      message: 'DataForge supports CSV, Excel (.xlsx/.xls), and JSON files. Files are automatically converted to Parquet for fast processing.',
+      message: 'DataLens supports CSV, Excel (.xlsx/.xls), and JSON files. Files are automatically converted to Parquet for fast processing.',
       time: '1 minute ago',
       read: false,
     },
@@ -83,9 +83,9 @@ const Notifications: React.FC = () => {
           <div className="flex justify-between items-center h-16">
             <Link to="/dashboard" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">DF</span>
+                <span className="text-white font-bold text-lg">DL</span>
               </div>
-              <span className="text-xl font-bold text-gray-900">DataForge</span>
+              <span className="text-xl font-bold text-gray-900">DataLens</span>
             </Link>
             <button onClick={() => navigate('/dashboard')} className="btn-secondary text-sm">
               ← Back to Dashboard

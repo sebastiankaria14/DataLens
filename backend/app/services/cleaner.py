@@ -708,65 +708,197 @@ def detect_target_columns(dataset_path: str, file_type: str = "parquet") -> List
 # Phase 6: ML Model Recommendation
 # ---------------------------------------------------------------------------
 
-def recommend_ml_models(target_column_type: str) -> Dict[str, Any]:
-    """Return model recommendations based on target type."""
-    if target_column_type in ("categorical", "string", "classification", "bool", "boolean"):
-        return {
-            "task": "classification",
-            "models": [
-                {
-                    "name": "Random Forest",
-                    "library": "sklearn.ensemble.RandomForestClassifier",
-                    "notes": "Good default; handles mixed types and non-linearity well.",
-                },
-                {
-                    "name": "Logistic Regression",
-                    "library": "sklearn.linear_model.LogisticRegression",
-                    "notes": "Fast and interpretable; works well when features are scaled.",
-                },
-                {
-                    "name": "Gradient Boosting",
-                    "library": "sklearn.ensemble.GradientBoostingClassifier",
-                    "notes": "Often best accuracy; slower to train.",
-                },
-                {
-                    "name": "XGBoost Classifier",
-                    "library": "xgboost.XGBClassifier",
-                    "notes": "Industry-grade boosting; great performance on tabular data.",
-                },
-                {
-                    "name": "LightGBM Classifier",
-                    "library": "lightgbm.LGBMClassifier",
-                    "notes": "Fast gradient boosting; efficient on large datasets.",
-                },
-            ],
-        }
+def recommend_ml_models(target_column_type: str, profile: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Return model recommendations ranked by dataset characteristics."""
+    profile = profile or {}
+    row_count: int = profile.get("row_count") or 0
+    col_count: int = profile.get("column_count") or 0
+    columns_info: Dict[str, Any] = profile.get("columns") or {}
+    missing_values: Dict[str, Any] = profile.get("missing_values") or {}
+
+    # Compute dataset traits
+    total_cells = row_count * col_count if row_count and col_count else 0
+    total_missing = sum(missing_values.values()) if missing_values else 0
+    missing_rate = (total_missing / total_cells) if total_cells else 0.0
+
+    numeric_cols = sum(
+        1 for info in columns_info.values()
+        if any(t in (info.get("dtype") or "").upper() for t in ["INT", "FLOAT", "DOUBLE", "DECIMAL", "REAL"])
+    )
+    categorical_cols = max(0, col_count - numeric_cols)
+    cat_ratio = categorical_cols / col_count if col_count else 0.0
+
+    is_small = row_count < 1_000
+    is_large = row_count > 50_000
+    is_very_large = row_count > 200_000
+    has_high_missing = missing_rate > 0.10
+    is_mostly_categorical = cat_ratio > 0.5
+
+    is_classification = target_column_type in ("categorical", "string", "classification", "bool", "boolean")
+
+    if is_classification:
+        models = [
+            {
+                "name": "Random Forest",
+                "library": "sklearn.ensemble.RandomForestClassifier",
+                "notes": "Good default; handles mixed types and non-linearity well.",
+                "_why_dataset": (
+                    f"Handles your {col_count} mixed-type columns robustly without requiring scaling."
+                    if is_mostly_categorical else
+                    f"Solid choice for {row_count:,} rows; resistant to outliers and doesn't require feature scaling."
+                ),
+            },
+            {
+                "name": "Logistic Regression",
+                "library": "sklearn.linear_model.LogisticRegression",
+                "notes": "Fast and interpretable; works well when features are scaled.",
+                "_why_dataset": (
+                    f"Ideal for {row_count:,} rows — trains in seconds and provides interpretable coefficients."
+                    if is_small else
+                    "Fast baseline; good when feature relationships are roughly linear."
+                ),
+            },
+            {
+                "name": "Gradient Boosting",
+                "library": "sklearn.ensemble.GradientBoostingClassifier",
+                "notes": "Often best accuracy; slower to train.",
+                "_why_dataset": (
+                    f"Typically achieves top accuracy on tabular data of this size ({row_count:,} rows); worth the extra training time."
+                    if not is_large else
+                    "Strong accuracy, but may be slow on your large dataset — consider XGBoost instead."
+                ),
+            },
+            {
+                "name": "XGBoost Classifier",
+                "library": "xgboost.XGBClassifier",
+                "notes": "Industry-grade boosting; great performance on tabular data.",
+                "_why_dataset": (
+                    f"Natively handles missing values ({missing_rate*100:.1f}% in your data) and scales well."
+                    if has_high_missing else
+                    f"Excellent on {row_count:,}-row datasets; fast parallel training beats sklearn GBM."
+                ),
+            },
+            {
+                "name": "LightGBM Classifier",
+                "library": "lightgbm.LGBMClassifier",
+                "notes": "Fast gradient boosting; efficient on large datasets.",
+                "_why_dataset": (
+                    f"Optimised for {row_count:,}+ rows — histogram-based trees train significantly faster than XGBoost."
+                    if is_large else
+                    f"GPU-accelerated option; handles high-cardinality categoricals in your {categorical_cols} categorical columns well."
+                ),
+            },
+        ]
+
+        # Score each model (higher = better for this dataset)
+        def score_cls(m: Dict) -> int:
+            name = m["name"]
+            s = 0
+            if name == "Logistic Regression":
+                if is_small: s += 30
+                if cat_ratio < 0.3: s += 10
+            if name == "Random Forest":
+                if not is_small and not is_large: s += 30
+                if not has_high_missing: s += 10
+            if name == "Gradient Boosting":
+                if not is_small and not is_very_large: s += 30
+                if not has_high_missing: s += 5
+            if name == "XGBoost Classifier":
+                if has_high_missing: s += 35
+                if row_count >= 5_000: s += 20
+                if is_mostly_categorical: s += 10
+            if name == "LightGBM Classifier":
+                if is_large: s += 40
+                if is_mostly_categorical: s += 15
+            return s
+
+        models.sort(key=score_cls, reverse=True)
+        for i, m in enumerate(models):
+            m["notes"] = m.pop("_why_dataset") if i == 0 else m["notes"]
+            m.pop("_why_dataset", None)
+            m["recommended"] = i == 0
+
+        return {"task": "classification", "models": models, "recommended_index": 0}
+
     else:
-        return {
-            "task": "regression",
-            "models": [
-                {
-                    "name": "Linear Regression",
-                    "library": "sklearn.linear_model.LinearRegression",
-                    "notes": "Simple baseline; assumes linear relationship.",
-                },
-                {
-                    "name": "Random Forest Regressor",
-                    "library": "sklearn.ensemble.RandomForestRegressor",
-                    "notes": "Non-linear; robust to outliers.",
-                },
-                {
-                    "name": "Gradient Boosting Regressor",
-                    "library": "sklearn.ensemble.GradientBoostingRegressor",
-                    "notes": "Usually best accuracy for regression tasks.",
-                },
-                {
-                    "name": "XGBoost Regressor",
-                    "library": "xgboost.XGBRegressor",
-                    "notes": "High-performance gradient boosting for regression.",
-                },
-            ],
-        }
+        models = [
+            {
+                "name": "Linear Regression",
+                "library": "sklearn.linear_model.LinearRegression",
+                "notes": "Simple baseline; assumes linear relationship.",
+                "_why_dataset": (
+                    f"Good starting point for {row_count:,} rows; fast to train and easy to interpret."
+                    if is_small else
+                    "Fast baseline — use to benchmark more complex models."
+                ),
+            },
+            {
+                "name": "Random Forest Regressor",
+                "library": "sklearn.ensemble.RandomForestRegressor",
+                "notes": "Non-linear; robust to outliers.",
+                "_why_dataset": (
+                    f"Captures non-linear patterns across your {col_count} features without hand-crafted interactions."
+                    if not is_large else
+                    "Solid accuracy but may be slow on large data — consider LightGBM."
+                ),
+            },
+            {
+                "name": "Gradient Boosting Regressor",
+                "library": "sklearn.ensemble.GradientBoostingRegressor",
+                "notes": "Usually best accuracy for regression tasks.",
+                "_why_dataset": (
+                    f"Typically the most accurate on datasets of this size ({row_count:,} rows)."
+                    if not is_large else
+                    "Accurate but slow at this dataset size — XGBoost or LightGBM are faster alternatives."
+                ),
+            },
+            {
+                "name": "XGBoost Regressor",
+                "library": "xgboost.XGBRegressor",
+                "notes": "High-performance gradient boosting for regression.",
+                "_why_dataset": (
+                    f"Handles {missing_rate*100:.1f}% missing values natively and scales well to {row_count:,} rows."
+                    if has_high_missing else
+                    f"Fast and accurate on {row_count:,}-row tabular data; strong competition to sklearn GBM."
+                ),
+            },
+            {
+                "name": "LightGBM Regressor",
+                "library": "lightgbm.LGBMRegressor",
+                "notes": "Fast gradient boosting; efficient on large datasets.",
+                "_why_dataset": (
+                    f"Histogram-based leaf-wise trees train much faster at {row_count:,} rows than other gradient boosters."
+                    if is_large else
+                    f"Efficient even on smaller datasets; handles your {categorical_cols} categorical columns natively."
+                ),
+            },
+        ]
+
+        def score_reg(m: Dict) -> int:
+            name = m["name"]
+            s = 0
+            if name == "Linear Regression":
+                if is_small: s += 25
+                if cat_ratio < 0.2: s += 10
+            if name == "Random Forest Regressor":
+                if not is_small and not is_large: s += 30
+            if name == "Gradient Boosting Regressor":
+                if not is_small and not is_very_large: s += 30
+            if name == "XGBoost Regressor":
+                if has_high_missing: s += 35
+                if row_count >= 5_000: s += 20
+            if name == "LightGBM Regressor":
+                if is_large: s += 40
+                if is_mostly_categorical: s += 10
+            return s
+
+        models.sort(key=score_reg, reverse=True)
+        for i, m in enumerate(models):
+            m["notes"] = m.pop("_why_dataset") if i == 0 else m["notes"]
+            m.pop("_why_dataset", None)
+            m["recommended"] = i == 0
+
+        return {"task": "regression", "models": models, "recommended_index": 0}
 
 
 # ---------------------------------------------------------------------------

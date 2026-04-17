@@ -2,8 +2,8 @@ function TestApp() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
       <div className="bg-white rounded-lg shadow-2xl p-12 max-w-md">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">DataForge</h1>
-        <p className="text-lg text-gray-600 mb-6">ML Dataset Preparation Platform</p>
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">DataLens</h1>
+        <p className="text-lg text-gray-600 mb-6">Dataset Analysis & Preparation Platform</p>
         <div className="space-y-3">
           <div className="bg-blue-100 border border-blue-300 text-blue-800 px-4 py-3 rounded-lg">
             ✅ React is working

@@ -1,4 +1,4 @@
-# DataForge Backend - Setup Complete ✅
+# DataLens Backend - Setup Complete ✅
 
 ## Status: Backend Fully Operational
 
@@ -122,18 +122,18 @@ VITE_API_URL=http://localhost:8000
 
 ## Database
 
-Currently using SQLite database: `backend/dataforge.db`
+Currently using SQLite database: `backend/datalens.db`
 
 To switch to PostgreSQL, update `.env`:
 ```
-DATABASE_URL=postgresql://user:password@localhost/dataforge
+DATABASE_URL=postgresql://user:password@localhost/datalens
 ```
 
 ## Directories
 
 - `backend/uploads/` - Uploaded datasets
 - `backend/processed/` - Cleaned datasets
-- `backend/dataforge.db` - SQLite database
+- `backend/datalens.db` - SQLite database
 
 ## Next Steps
 
@@ -175,4 +175,4 @@ DATABASE_URL=postgresql://user:password@localhost/dataforge
 
 ## 🎉 Backend is Ready!
 
-Both frontend and backend are now fully integrated and operational. You can start using DataForge for ML dataset preparation!
+Both frontend and backend are now fully integrated and operational. You can start using DataLens for dataset analysis and ML preparation!

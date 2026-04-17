@@ -30,7 +30,7 @@ const ForgotPassword: React.FC = () => {
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">DataForge</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">DataLens</h1>
           <p className="text-gray-600">Reset your password</p>
         </div>
 
@@ -97,7 +97,7 @@ const ForgotPassword: React.FC = () => {
 
         {/* Footer */}
         <p className="mt-8 text-center text-sm text-gray-500">
-          Need help? Contact support@dataforge.io
+          Need help? Contact support@datalens.example.com
         </p>
       </div>
     </div>

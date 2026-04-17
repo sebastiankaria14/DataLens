@@ -9,7 +9,7 @@ _ENV_FILE = _BASE_DIR / ".env"
 
 class Settings(BaseSettings):
     # Database
-    DATABASE_URL: str = "sqlite:///./dataforge.db"
+    DATABASE_URL: str = "sqlite:///./datalens.db"
     
     # JWT
     SECRET_KEY: str

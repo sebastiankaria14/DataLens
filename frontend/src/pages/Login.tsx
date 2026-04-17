@@ -38,7 +38,7 @@ const Login: React.FC = () => {
           <div className="w-9 h-9 bg-indigo-500 rounded-lg flex items-center justify-center">
             <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" /></svg>
           </div>
-          <span className="text-white font-semibold text-lg tracking-tight">DataForge</span>
+          <span className="text-white font-semibold text-lg tracking-tight">DataLens</span>
         </div>
         <div className="relative z-10 space-y-8">
           <div>
@@ -54,13 +54,13 @@ const Login: React.FC = () => {
             ))}
           </div>
         </div>
-        <p className="relative z-10 text-xs text-slate-600">© 2026 DataForge</p>
+        <p className="relative z-10 text-xs text-slate-600">© 2026 DataLens</p>
       </div>
       <div className="flex-1 flex items-center justify-center px-6 py-12 bg-slate-50">
         <motion.div initial={{ opacity:0,y:16 }} animate={{ opacity:1,y:0 }} transition={{ duration:0.4,ease:'easeOut' }} className="w-full max-w-sm">
           <div className="lg:hidden flex items-center gap-2 mb-8">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center"><svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg></div>
-            <span className="font-semibold text-slate-900">DataForge</span>
+            <span className="font-semibold text-slate-900">DataLens</span>
           </div>
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-slate-900">Sign in</h1>

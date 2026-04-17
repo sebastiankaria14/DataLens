@@ -1,4 +1,4 @@
-# DataForge - ML Dataset Preparation Platform
+# DataLens - Dataset Analysis & ML Preparation Platform
 
 A production-grade platform for preparing and cleaning datasets for machine learning.
 

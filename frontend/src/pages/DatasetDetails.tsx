@@ -45,7 +45,7 @@ const DatasetDetails: React.FC = () => {
   
   // Visualization states
   const [selectedColumn, setSelectedColumn] = useState<string>('');
-  const [selectedChart, setSelectedChart] = useState<'histogram' | 'bar' | 'box'>('histogram');
+  const [selectedChart, setSelectedChart] = useState<string>('histogram');
   const [vizData, setVizData] = useState<VisualizationData | null>(null);
   const [vizStats, setVizStats] = useState<VisualizationStats | undefined>(undefined);
   const [vizError, setVizError] = useState<string>('');
@@ -142,10 +142,10 @@ const DatasetDetails: React.FC = () => {
   useEffect(() => {
     if (!selectedColumn) return;
     const type = resolveColumnType(selectedColumn);
-    if (type === 'categorical' && selectedChart !== 'bar') {
+    if (type === 'categorical' && !['bar', 'pie'].includes(selectedChart)) {
       setSelectedChart('bar');
     }
-    if (type === 'numeric' && selectedChart === 'bar') {
+    if (type === 'numeric' && ['bar', 'pie'].includes(selectedChart)) {
       setSelectedChart('histogram');
     }
   }, [selectedColumn]);
@@ -183,17 +183,20 @@ const DatasetDetails: React.FC = () => {
     };
   }, [id, profile, dataset]);
 
-  const loadVisualization = async (column: string, chartType: 'histogram' | 'bar' | 'box') => {
+  const loadVisualization = async (column: string, chartType: string) => {
     if (!Number.isFinite(id) || !column) return;
     setVizLoading(true);
     setVizError('');
     try {
       const colType = resolveColumnType(column);
-      let desiredChart: 'histogram' | 'bar' | 'box' = chartType;
-      if (desiredChart === 'box' && colType !== 'numeric') {
-        desiredChart = 'bar';
-      }
-      const data = await datasetService.getColumnVisualization(id as number, column, desiredChart, 15);
+      // Map frontend chart types to API-supported types
+      let apiChartType: 'histogram' | 'bar' | 'box' = chartType === 'line' ? 'histogram'
+        : chartType === 'pie' ? 'bar'
+        : chartType === 'box' ? 'box'
+        : chartType === 'bar' ? 'bar'
+        : 'histogram';
+      if (apiChartType === 'box' && colType !== 'numeric') apiChartType = 'bar';
+      const data = await datasetService.getColumnVisualization(id as number, column, apiChartType, 15);
       setVizData(data);
       setVizStats(data.stats);
     } catch (e: any) {
@@ -389,11 +392,12 @@ const DatasetDetails: React.FC = () => {
       <VisualizationWorkspace
         isOpen={isVizOpen}
         onClose={() => setIsVizOpen(false)}
+        datasetId={id}
         columnNames={columnNames}
         selectedColumn={selectedColumn}
         onColumnChange={setSelectedColumn}
         selectedChart={selectedChart}
-        onChartChange={(chart) => setSelectedChart(chart as any)}
+        onChartChange={(chart) => setSelectedChart(chart)}
         vizData={vizData}
         vizStats={vizStats}
         vizLoading={vizLoading}
