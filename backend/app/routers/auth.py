@@ -16,12 +16,12 @@ router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 @router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def signup(user_data: UserCreate, db: Session = Depends(get_db)):
     """Register a new user."""
-    print(f"📝 Signup request received for email: {user_data.email}")
+    print(f"Signup request received for email: {user_data.email}")
     
     # Check if user already exists
     existing_user = db.query(User).filter(User.email == user_data.email).first()
     if existing_user:
-        print(f"❌ Email already registered: {user_data.email}")
+        print(f"Email already registered: {user_data.email}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
@@ -41,7 +41,7 @@ async def signup(user_data: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
     
-    print(f"✅ User created successfully: {user_data.email}")
+    print(f"User created successfully: {user_data.email}")
     return new_user
 
 
