@@ -276,7 +276,7 @@ const DatasetDetails: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="page-shell">
       <DatasetHeader dataset={dataset} isLoading={isLoading} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -305,7 +305,7 @@ const DatasetDetails: React.FC = () => {
         {isProfiling && (
           <div className="bg-slate-50 border border-slate-200 text-slate-700 px-6 py-4 rounded-xl">
             <div className="flex items-center space-x-3">
-              <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-sky-700 border-t-transparent rounded-full animate-spin" />
               <span className="text-sm font-medium">Profiling in progress — updates every {POLL_MS / 1000}s.</span>
             </div>
           </div>
@@ -314,7 +314,7 @@ const DatasetDetails: React.FC = () => {
         {isCleaning && (
           <div className="bg-slate-50 border border-slate-200 text-slate-700 px-6 py-4 rounded-xl">
             <div className="flex items-center space-x-3">
-              <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-sky-700 border-t-transparent rounded-full animate-spin" />
               <span className="text-sm font-medium">Cleaning in progress — this page will refresh automatically.</span>
             </div>
           </div>
@@ -338,7 +338,7 @@ const DatasetDetails: React.FC = () => {
                     onClick={() => setActiveSection(tab.key)}
                     className={`flex-1 min-w-[140px] px-6 py-4 text-sm font-semibold transition-all whitespace-nowrap ${
                       activeSection === tab.key
-                        ? 'border-b-2 border-indigo-500 text-indigo-600 bg-indigo-50'
+                        ? 'border-b-2 border-sky-700 text-sky-700 bg-sky-50'
                         : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
                     }`}
                   >

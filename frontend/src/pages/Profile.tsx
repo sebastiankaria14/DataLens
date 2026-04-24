@@ -58,13 +58,13 @@ const Profile: React.FC = () => {
   const memberSince = 'February 2026';
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-shell">
       {/* Navbar */}
-      <nav className="bg-white shadow-sm border-b border-gray-200">
+      <nav className="app-navbar">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/dashboard" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-sky-800 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-lg">DL</span>
               </div>
               <span className="text-xl font-bold text-gray-900">DataLens</span>
@@ -81,8 +81,8 @@ const Profile: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Page Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
-          <p className="mt-1 text-gray-600">Manage your account information</p>
+          <h1 className="text-3xl font-bold text-slate-900">Profile</h1>
+          <p className="mt-1 text-slate-600">Manage your account information</p>
         </div>
 
         {saved && (
@@ -100,9 +100,9 @@ const Profile: React.FC = () => {
         )}
 
         {/* Profile Card */}
-        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+        <div className="surface-pane overflow-hidden">
           {/* Cover / Banner */}
-          <div className="h-32 bg-gradient-to-r from-primary-600 via-primary-500 to-indigo-500 relative">
+          <div className="h-32 bg-gradient-to-r from-sky-900 via-sky-800 to-cyan-700 relative">
             <div className="absolute inset-0 opacity-20">
               <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
                 <defs>
@@ -118,7 +118,7 @@ const Profile: React.FC = () => {
           <div className="px-8 pb-8">
             {/* Avatar */}
             <div className="-mt-16 mb-6 flex items-end justify-between">
-              <div className="w-28 h-28 bg-primary-600 rounded-2xl border-4 border-white shadow-lg flex items-center justify-center">
+              <div className="w-28 h-28 bg-sky-800 rounded-2xl border-4 border-white shadow-lg flex items-center justify-center">
                 <span className="text-white font-bold text-4xl">{initials}</span>
               </div>
               <button
@@ -169,7 +169,7 @@ const Profile: React.FC = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-6 border border-blue-100 shadow-sm">
+          <div className="card bg-gradient-to-br from-sky-50 to-white">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
                 <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" /></svg>
@@ -180,7 +180,7 @@ const Profile: React.FC = () => {
             <div className="text-xs text-gray-500 mt-1">Total uploaded</div>
           </div>
 
-          <div className="bg-gradient-to-br from-green-50 to-white rounded-2xl p-6 border border-green-100 shadow-sm">
+          <div className="card bg-gradient-to-br from-emerald-50 to-white">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
                 <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -191,12 +191,12 @@ const Profile: React.FC = () => {
             <div className="text-xs text-gray-500 mt-1">Datasets cleaned</div>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-50 to-white rounded-2xl p-6 border border-purple-100 shadow-sm">
+          <div className="card bg-gradient-to-br from-cyan-50 to-white">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+              <div className="w-10 h-10 bg-cyan-100 rounded-xl flex items-center justify-center">
+                <svg className="w-5 h-5 text-cyan-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
               </div>
-              <div className="text-xs font-semibold text-purple-600 uppercase tracking-wide">Days Active</div>
+              <div className="text-xs font-semibold text-cyan-700 uppercase tracking-wide">Days Active</div>
             </div>
             <div className="text-3xl font-bold text-gray-900">1</div>
             <div className="text-xs text-gray-500 mt-1">Since signup</div>
@@ -204,7 +204,7 @@ const Profile: React.FC = () => {
         </div>
 
         {/* Danger Zone */}
-        <div className="bg-white rounded-2xl shadow-lg border border-red-200 p-6">
+        <div className="card border-red-200">
           <h3 className="text-lg font-semibold text-red-700 mb-2">Danger Zone</h3>
           <p className="text-sm text-gray-600 mb-4">
             Permanently delete your account and all associated datasets. This action cannot be undone.

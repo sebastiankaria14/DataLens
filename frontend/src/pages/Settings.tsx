@@ -57,7 +57,7 @@ const Settings: React.FC = () => {
     <button
       onClick={() => onChange(!enabled)}
       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-        enabled ? 'bg-primary-600' : 'bg-gray-300'
+        enabled ? 'bg-sky-700' : 'bg-gray-300'
       }`}
     >
       <span
@@ -69,13 +69,13 @@ const Settings: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-shell">
       {/* Navbar */}
-      <nav className="bg-white shadow-sm border-b border-gray-200">
+      <nav className="app-navbar">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/dashboard" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-sky-800 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-lg">DL</span>
               </div>
               <span className="text-xl font-bold text-gray-900">DataLens</span>
@@ -90,8 +90,8 @@ const Settings: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-          <p className="mt-1 text-gray-600">Configure your DataLens experience</p>
+          <h1 className="text-3xl font-bold text-slate-900">Settings</h1>
+          <p className="mt-1 text-slate-600">Configure your DataLens experience</p>
         </div>
 
         {saved && (
@@ -102,7 +102,7 @@ const Settings: React.FC = () => {
         )}
 
         {/* Notifications */}
-        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6">
+        <div className="surface-pane p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
               <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
@@ -139,7 +139,7 @@ const Settings: React.FC = () => {
         </div>
 
         {/* Data Processing */}
-        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6">
+        <div className="surface-pane p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
               <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" /></svg>
@@ -168,7 +168,7 @@ const Settings: React.FC = () => {
                     onClick={() => setDefaultFormat(fmt)}
                     className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
                       defaultFormat === fmt
-                        ? 'border-primary-500 bg-primary-50 text-primary-700'
+                        ? 'border-sky-600 bg-sky-50 text-sky-800'
                         : 'border-gray-200 text-gray-600 hover:border-gray-300'
                     }`}
                   >
@@ -181,7 +181,7 @@ const Settings: React.FC = () => {
         </div>
 
         {/* Change Password */}
-        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6">
+        <div className="surface-pane p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center">
               <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>

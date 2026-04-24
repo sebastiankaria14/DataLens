@@ -36,22 +36,22 @@ const DatasetOverview: React.FC<DatasetOverviewProps> = ({ insight, isLoading })
   const insights: string[] = [];
   
   if (insight.row_count && insight.row_count > 10000) {
-    insights.push('📊 Large-scale dataset detected');
+    insights.push('Large-scale dataset detected');
   } else if (insight.row_count && insight.row_count < 1000) {
-    insights.push('📊 Small dataset - consider data augmentation');
+    insights.push('Small dataset; consider augmentation strategies');
   }
 
   if (insight.duplicates && insight.duplicates > 0) {
-    insights.push('⚠️ Contains duplicate records');
+    insights.push('Contains duplicate records');
   }
 
   if (insight.missing_rate && insight.missing_rate > 0.1) {
-    insights.push('🔍 Significant missing values detected');
+    insights.push('Significant missing values detected');
   }
 
   if (insight.imbalance_warnings && insight.imbalance_warnings.length > 0) {
     const severe = insight.imbalance_warnings.some(w => w.severity === 'SEVERE');
-    insights.push(severe ? '⚖️ Severe class imbalance' : '⚖️ Mild class imbalance');
+    insights.push(severe ? 'Severe class imbalance' : 'Moderate class imbalance');
   }
 
   const hasNumericCols = insight.columns?.some(c => {
@@ -62,15 +62,15 @@ const DatasetOverview: React.FC<DatasetOverviewProps> = ({ insight, isLoading })
   const hasCategoricalCols = insight.columns?.some(c => c.is_categorical);
 
   if (hasNumericCols && hasCategoricalCols) {
-    insights.push('🎯 Suitable for regression & classification');
+    insights.push('Suitable for regression and classification');
   } else if (hasNumericCols) {
-    insights.push('🎯 Suitable for regression tasks');
+    insights.push('Suitable for regression tasks');
   } else if (hasCategoricalCols) {
-    insights.push('🎯 Suitable for classification tasks');
+    insights.push('Suitable for classification tasks');
   }
 
   if (insights.length === 0) {
-    insights.push('✅ Dataset looks clean and ready');
+    insights.push('Dataset quality looks production-ready');
   }
 
   return (
@@ -78,7 +78,7 @@ const DatasetOverview: React.FC<DatasetOverviewProps> = ({ insight, isLoading })
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
-      className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-shadow duration-300"
+      className="surface-pane p-6 hover:shadow-xl transition-shadow duration-300"
     >
       <div className="flex items-start justify-between gap-6">
         <div className="flex-1">
@@ -90,7 +90,7 @@ const DatasetOverview: React.FC<DatasetOverviewProps> = ({ insight, isLoading })
               {insight.domain && insight.domain !== 'General' && (
                 <div>
                   <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1.5">Domain</p>
-                  <span className="badge badge-indigo text-sm font-semibold px-3 py-1">
+                          <span className="badge badge-cyan text-sm font-semibold px-3 py-1">
                     {insight.domain_icon} {insight.domain}
                   </span>
                 </div>

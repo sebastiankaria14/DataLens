@@ -167,6 +167,13 @@ export interface MLPrepOptions {
   encode?: boolean;
 }
 
+export interface MLReadyFiles {
+  train_available: boolean;
+  test_available: boolean;
+  train_filename?: string | null;
+  test_filename?: string | null;
+}
+
 export interface MLPrepStats {
   initial_rows: number;
   initial_columns: number;
@@ -332,6 +339,25 @@ class DatasetService {
    */
   async prepareML(id: number, opts: MLPrepOptions): Promise<{ message: string; dataset_id: number }> {
     const response = await api.post(`/api/datasets/${id}/prepare-ml`, opts);
+    return response.data;
+  }
+
+  /**
+   * Get ML-ready train/test file availability.
+   */
+  async getMLReadyFiles(id: number): Promise<MLReadyFiles> {
+    const response = await api.get<MLReadyFiles>(`/api/datasets/${id}/ml-ready-files`);
+    return response.data;
+  }
+
+  /**
+   * Download ML-ready train or test parquet.
+   */
+  async downloadMLReadyFile(id: number, split: 'train' | 'test'): Promise<Blob> {
+    const response = await api.get(`/api/datasets/${id}/download-ml-ready`, {
+      params: { split },
+      responseType: 'blob',
+    });
     return response.data;
   }
 

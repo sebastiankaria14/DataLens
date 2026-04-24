@@ -41,7 +41,7 @@ const MLPanel: React.FC<MLPanelProps> = ({ datasetId, datasetStatus, onPrepareCo
     } finally {
       setLoading(false);
     }
-  }; //fuck jahnvi
+  };
 
   useEffect(() => {
     loadAnalysis();
@@ -76,7 +76,7 @@ const MLPanel: React.FC<MLPanelProps> = ({ datasetId, datasetStatus, onPrepareCo
       className="bg-white rounded-2xl shadow-lg overflow-hidden"
     >
       {/* Header */}
-      <div className="bg-gradient-to-r from-violet-500 to-purple-600 px-8 py-6">
+      <div className="bg-gradient-to-r from-sky-800 to-cyan-700 px-8 py-6">
         <h2 className="text-2xl font-bold text-white flex items-center gap-3">
           <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -84,7 +84,7 @@ const MLPanel: React.FC<MLPanelProps> = ({ datasetId, datasetStatus, onPrepareCo
           </svg>
           ML Preparation
         </h2>
-        <p className="text-purple-100 mt-1 text-sm">
+        <p className="text-sky-100 mt-1 text-sm">
           ML readiness analysis, feature engineering suggestions, and auto dataset preparation.
         </p>
       </div>
@@ -97,7 +97,7 @@ const MLPanel: React.FC<MLPanelProps> = ({ datasetId, datasetStatus, onPrepareCo
             onClick={() => setActiveTab(tab)}
             className={`px-6 py-3.5 text-sm font-semibold capitalize transition-colors ${
               activeTab === tab
-                ? 'border-b-2 border-purple-500 text-purple-600 bg-white'
+                ? 'border-b-2 border-sky-700 text-sky-700 bg-white'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -115,7 +115,7 @@ const MLPanel: React.FC<MLPanelProps> = ({ datasetId, datasetStatus, onPrepareCo
 
         {isReady && loading && (
           <div className="flex items-center justify-center py-12">
-            <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-sky-700 border-t-transparent rounded-full animate-spin" />
           </div>
         )}
 
@@ -166,11 +166,11 @@ const MLPanel: React.FC<MLPanelProps> = ({ datasetId, datasetStatus, onPrepareCo
                   </div>
                 )}
 
-                <div className="bg-purple-50 border border-purple-200 rounded-xl p-5">
-                  <h4 className="font-semibold text-purple-800 mb-2">Recommendations</h4>
+                <div className="bg-sky-50 border border-sky-200 rounded-xl p-5">
+                  <h4 className="font-semibold text-sky-800 mb-2">Recommendations</h4>
                   <ul className="space-y-1">
                     {mlData.ml_readiness.recommendations.map((r, i) => (
-                      <li key={i} className="text-sm text-purple-700 flex gap-2"><span>→</span>{r}</li>
+                      <li key={i} className="text-sm text-sky-700 flex gap-2"><span>→</span>{r}</li>
                     ))}
                   </ul>
                 </div>
@@ -181,28 +181,28 @@ const MLPanel: React.FC<MLPanelProps> = ({ datasetId, datasetStatus, onPrepareCo
               <motion.div key="features" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
                 <SuggestionList
                   title="Columns to Drop"
-                  icon="🗑"
+                  icon="DROP"
                   items={mlData.feature_suggestions.drop_columns || []}
                   badge="badge-red"
                   emptyText="No columns flagged for dropping."
                 />
                 <SuggestionList
                   title="Normalize These Columns"
-                  icon="📐"
+                  icon="NORM"
                   items={mlData.feature_suggestions.normalize_columns || []}
                   badge="badge-blue"
                   emptyText="No numeric columns require normalization."
                 />
                 <SuggestionList
                   title="Encode These Columns"
-                  icon="🔤"
+                  icon="ENC"
                   items={mlData.feature_suggestions.encode_columns || []}
                   badge="badge-green"
                   emptyText="No categorical columns require encoding."
                 />
                 {(mlData.feature_suggestions.create_features || []).length > 0 && (
                   <div>
-                    <h4 className="text-sm font-semibold text-gray-700 mb-2">💡 Feature Creation Ideas</h4>
+                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Feature Creation Ideas</h4>
                     {mlData.feature_suggestions.create_features.map((f, i) => (
                       <div key={i} className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800 mb-2">
                         <strong>{f.column}</strong>: {f.description}
@@ -212,7 +212,7 @@ const MLPanel: React.FC<MLPanelProps> = ({ datasetId, datasetStatus, onPrepareCo
                 )}
                 {(mlData.feature_suggestions.correlated_pairs || []).length > 0 && (
                   <div>
-                    <h4 className="text-sm font-semibold text-gray-700 mb-2">🔗 Highly Correlated Pairs</h4>
+                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Highly Correlated Pairs</h4>
                     {mlData.feature_suggestions.correlated_pairs.map((p, i) => (
                       <div key={i} className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm text-gray-700 mb-2">
                         <span className="font-mono bg-gray-200 px-1 rounded">{p.col1}</span>
@@ -248,8 +248,8 @@ const MLPanel: React.FC<MLPanelProps> = ({ datasetId, datasetStatus, onPrepareCo
                         key={i}
                         className={`rounded-xl p-5 transition-all ${
                           isTop
-                            ? 'border-2 border-purple-400 bg-purple-50 shadow-sm'
-                            : 'border border-gray-200 hover:border-purple-200 hover:shadow-sm'
+                            ? 'border-2 border-sky-300 bg-sky-50 shadow-sm'
+                            : 'border border-gray-200 hover:border-sky-200 hover:shadow-sm'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
@@ -257,17 +257,17 @@ const MLPanel: React.FC<MLPanelProps> = ({ datasetId, datasetStatus, onPrepareCo
                             <div className="flex items-center gap-2 flex-wrap">
                               <h4 className="font-semibold text-gray-900">{model.name}</h4>
                               {isTop && (
-                                <span className="text-xs font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full whitespace-nowrap">
-                                  ⭐ Recommended
+                                <span className="text-xs font-bold text-sky-800 bg-sky-100 px-2 py-0.5 rounded-full whitespace-nowrap">
+                                  Recommended
                                 </span>
                               )}
                             </div>
-                            <code className="text-xs text-purple-600 bg-white border border-purple-100 px-2 py-0.5 rounded mt-1.5 inline-block">
+                            <code className="text-xs text-sky-700 bg-white border border-sky-100 px-2 py-0.5 rounded mt-1.5 inline-block">
                               {model.library}
                             </code>
                           </div>
                         </div>
-                        <p className={`text-sm mt-2 ${isTop ? 'text-purple-900 font-medium' : 'text-gray-500'}`}>
+                        <p className={`text-sm mt-2 ${isTop ? 'text-sky-900 font-medium' : 'text-gray-500'}`}>
                           {model.notes}
                         </p>
                       </div>
@@ -288,7 +288,7 @@ const MLPanel: React.FC<MLPanelProps> = ({ datasetId, datasetStatus, onPrepareCo
                 <div>
                   <label className="text-sm font-semibold text-gray-700 block mb-1.5">Target Column</label>
                   <select
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white focus:ring-2 focus:ring-purple-400 outline-none"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white focus:ring-2 focus:ring-sky-400 outline-none"
                     value={selectedTarget}
                     onChange={(e) => setSelectedTarget(e.target.value)}
                   >
@@ -311,7 +311,7 @@ const MLPanel: React.FC<MLPanelProps> = ({ datasetId, datasetStatus, onPrepareCo
                     step={5}
                     value={testSize * 100}
                     onChange={(e) => setTestSize(Number(e.target.value) / 100)}
-                    className="w-full accent-purple-500"
+                    className="w-full accent-sky-600"
                   />
                   <div className="flex justify-between text-xs text-gray-400 mt-1">
                     <span>10% test</span><span>40% test</span>
@@ -335,7 +335,7 @@ const MLPanel: React.FC<MLPanelProps> = ({ datasetId, datasetStatus, onPrepareCo
                   className={`w-full py-4 rounded-2xl font-semibold text-white text-lg shadow-lg transition-all flex items-center justify-center gap-3 ${
                     isPreparing
                       ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-violet-500 to-purple-600 hover:shadow-xl'
+                      : 'bg-gradient-to-r from-sky-700 to-cyan-700 hover:shadow-xl'
                   }`}
                 >
                   {isPreparing ? (
@@ -396,7 +396,7 @@ const BreakdownBar: React.FC<{ label: string; value: number; max: number }> = ({
     </div>
     <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
       <div
-        className="h-full bg-gradient-to-r from-violet-400 to-purple-500 rounded-full transition-all duration-700"
+        className="h-full bg-gradient-to-r from-sky-500 to-cyan-600 rounded-full transition-all duration-700"
         style={{ width: `${Math.min(100, (value / max) * 100)}%` }}
       />
     </div>

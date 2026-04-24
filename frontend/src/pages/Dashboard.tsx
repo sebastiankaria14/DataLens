@@ -52,14 +52,14 @@ const Dashboard: React.FC = () => {
   const totalStorageMB = datasets.reduce((acc, d) => acc + (d.file_size ?? 0), 0) / (1024 * 1024);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="page-shell">
       {/* Navbar */}
-      <nav className="bg-white border-b border-slate-200">
+      <nav className="app-navbar">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <Link to="/" className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-sky-800 rounded-lg flex items-center justify-center shadow-sm">
                   <span className="text-white font-bold text-sm">DL</span>
                 </div>
                 <span className="text-xl font-bold text-slate-900">DataLens</span>
@@ -74,9 +74,9 @@ const Dashboard: React.FC = () => {
               <div className="relative" ref={profileMenuRef}>
                 <button
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
-                  className="flex items-center space-x-2 hover:bg-slate-100 rounded-lg p-2 transition-colors"
+                  className="flex items-center space-x-2 hover:bg-slate-100 rounded-xl p-2 transition-colors"
                 >
-                  <div className="w-9 h-9 bg-indigo-600 rounded-full flex items-center justify-center">
+                  <div className="w-9 h-9 bg-sky-800 rounded-full flex items-center justify-center">
                     <span className="text-white font-semibold">{user?.full_name?.charAt(0)?.toUpperCase() || 'U'}</span>
                   </div>
                   <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,7 +86,7 @@ const Dashboard: React.FC = () => {
 
                 {/* Dropdown Menu */}
                 {showProfileMenu && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-slate-200 py-2 z-50">
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-50 reveal-fade">
                     <div className="px-4 py-3 border-b border-slate-100">
                       <p className="text-sm font-semibold text-slate-900">{user?.full_name || 'User Account'}</p>
                       <p className="text-xs text-slate-400">{user?.email || 'user@example.com'}</p>
@@ -123,7 +123,7 @@ const Dashboard: React.FC = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                       </svg>
                       Notifications
-                      <span className="ml-auto bg-indigo-600 text-white text-xs px-2 py-0.5 rounded-full">3</span>
+                      <span className="ml-auto bg-sky-700 text-white text-xs px-2 py-0.5 rounded-full">3</span>
                     </Link>
                     
                     <Link
@@ -159,7 +159,7 @@ const Dashboard: React.FC = () => {
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
-        <div className="mb-8">
+        <div className="mb-8 reveal-up">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
@@ -179,11 +179,11 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Link to="/upload" className="card hover:border-indigo-200 transition-colors group">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 reveal-up" style={{ animationDelay: '90ms' }}>
+          <Link to="/upload" className="card hover:border-sky-200 hover:shadow-md transition-all group">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
-                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 bg-sky-50 rounded-lg flex items-center justify-center group-hover:bg-sky-100 transition-colors">
+                <svg className="w-5 h-5 text-sky-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
               </div>
@@ -194,7 +194,7 @@ const Dashboard: React.FC = () => {
             </div>
           </Link>
 
-          <div className="card">
+          <div className="card hover:shadow-md transition-all">
             <div className="flex items-center space-x-4">
               <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center">
                 <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,10 +208,10 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="card">
+          <div className="card hover:shadow-md transition-all">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-violet-50 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 bg-cyan-50 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-cyan-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                 </svg>
               </div>
@@ -224,7 +224,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 reveal-up" style={{ animationDelay: '150ms' }}>
           <div className="card">
             <div className="stat-label">Total Datasets</div>
             <div className="stat-value">
@@ -263,7 +263,7 @@ const Dashboard: React.FC = () => {
         {/* Recent Datasets or Empty State */}
         {datasetsLoading ? (
           <div className="card text-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-indigo-600 border-t-transparent mx-auto mb-4" />
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-sky-700 border-t-transparent mx-auto mb-4" />
             <p className="text-slate-400 text-sm">Loading datasets…</p>
           </div>
         ) : datasets.length === 0 ? (
@@ -299,11 +299,11 @@ const Dashboard: React.FC = () => {
                   <Link
                     key={ds.id}
                     to={`/datasets/${ds.id}`}
-                    className="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50/40 transition-all group"
+                    className="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:border-sky-200 hover:bg-sky-50/50 transition-all group"
                   >
                     <div className="flex items-center space-x-3 min-w-0">
-                      <div className="w-9 h-9 bg-indigo-50 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-100 transition-colors">
-                        <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="w-9 h-9 bg-sky-50 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-sky-100 transition-colors">
+                        <svg className="w-4 h-4 text-sky-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                       </div>
@@ -324,7 +324,7 @@ const Dashboard: React.FC = () => {
                       <span className="text-xs text-slate-400">
                         {new Date(ds.created_at).toLocaleDateString()}
                       </span>
-                      <svg className="w-4 h-4 text-slate-300 group-hover:text-indigo-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-slate-300 group-hover:text-sky-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </div>
@@ -336,11 +336,11 @@ const Dashboard: React.FC = () => {
         )}
 
         {/* Getting Started Guide */}
-        <div className="mt-8 card">
+        <div className="mt-8 card reveal-up" style={{ animationDelay: '210ms' }}>
           <h2 className="text-base font-semibold text-slate-900 mb-6">How It Works</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="text-center">
-              <div className="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center text-sm font-bold mx-auto mb-3">
+              <div className="w-10 h-10 bg-sky-800 text-white rounded-full flex items-center justify-center text-sm font-bold mx-auto mb-3">
                 1
               </div>
               <h3 className="font-semibold text-slate-900 text-sm mb-1">Upload</h3>
@@ -350,7 +350,7 @@ const Dashboard: React.FC = () => {
             </div>
             
             <div className="text-center">
-              <div className="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center text-sm font-bold mx-auto mb-3">
+              <div className="w-10 h-10 bg-sky-800 text-white rounded-full flex items-center justify-center text-sm font-bold mx-auto mb-3">
                 2
               </div>
               <h3 className="font-semibold text-slate-900 text-sm mb-1">Profile</h3>
@@ -360,7 +360,7 @@ const Dashboard: React.FC = () => {
             </div>
             
             <div className="text-center">
-              <div className="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center text-sm font-bold mx-auto mb-3">
+              <div className="w-10 h-10 bg-sky-800 text-white rounded-full flex items-center justify-center text-sm font-bold mx-auto mb-3">
                 3
               </div>
               <h3 className="font-semibold text-slate-900 text-sm mb-1">Clean</h3>
@@ -370,7 +370,7 @@ const Dashboard: React.FC = () => {
             </div>
             
             <div className="text-center">
-              <div className="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center text-sm font-bold mx-auto mb-3">
+              <div className="w-10 h-10 bg-sky-800 text-white rounded-full flex items-center justify-center text-sm font-bold mx-auto mb-3">
                 4
               </div>
               <h3 className="font-semibold text-slate-900 text-sm mb-1">Export</h3>

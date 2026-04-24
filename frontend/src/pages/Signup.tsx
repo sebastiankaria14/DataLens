@@ -49,10 +49,10 @@ const Signup: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="page-shell lg:grid lg:grid-cols-[0.95fr_1.05fr]">
       {/* Left brand panel */}
       <div
-        className="hidden lg:flex lg:w-2/5 xl:w-1/2 bg-slate-900 flex-col justify-between p-12 relative overflow-hidden"
+        className="hidden lg:flex bg-slate-900 flex-col justify-between p-12 relative overflow-hidden"
         style={{
           backgroundImage:
             'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0)',
@@ -61,7 +61,7 @@ const Signup: React.FC = () => {
       >
         <div>
           <div className="flex items-center space-x-2.5">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-sky-700 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">DL</span>
             </div>
             <span className="text-white font-semibold text-lg">DataLens</span>
@@ -70,16 +70,16 @@ const Signup: React.FC = () => {
 
         <div>
           <blockquote className="text-slate-300 text-xl font-light leading-relaxed mb-8">
-            "Start turning raw data into ML-ready assets in minutes."
+            "Build a dependable ML data foundation from day one."
           </blockquote>
           <ul className="space-y-4">
             {[
-              'Automatic schema detection & profiling',
-              'Smart cleaning with Polars & DuckDB',
-              'Export in Parquet, CSV, or Excel',
+              'Automated schema and quality profiling',
+              'Structured cleaning workflows for reproducibility',
+              'Export-ready datasets for training pipelines',
             ].map((f) => (
               <li key={f} className="flex items-center gap-3 text-slate-400 text-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 flex-shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full bg-sky-500 flex-shrink-0" />
                 {f}
               </li>
             ))}
@@ -92,16 +92,16 @@ const Signup: React.FC = () => {
       </div>
 
       {/* Right form panel */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white">
+      <div className="flex items-center justify-center px-6 py-12">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: 'easeOut' }}
-          className="w-full max-w-md"
+          className="w-full max-w-md surface-pane p-7 sm:p-8"
         >
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center space-x-2 mb-8">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-sky-800 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">DL</span>
             </div>
             <span className="text-slate-900 font-semibold text-lg">DataLens</span>
@@ -110,7 +110,7 @@ const Signup: React.FC = () => {
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Create your account</h1>
           <p className="mt-1 text-sm text-slate-500">
             Already have an account?{' '}
-            <Link to="/login" className="text-indigo-600 hover:text-indigo-700 font-medium">
+            <Link to="/login" className="text-sky-700 hover:text-sky-800 font-medium">
               Sign in
             </Link>
           </p>

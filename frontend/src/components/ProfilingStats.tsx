@@ -45,9 +45,9 @@ const ProfilingStats: React.FC<ProfilingStatsProps> = ({ profile }) => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.75, duration: 0.3 }}
-          className="p-5 bg-white rounded-xl border border-slate-200 hover:border-violet-300 transition-colors"
+          className="p-5 bg-white rounded-xl border border-slate-200 hover:border-cyan-300 transition-colors"
         >
-          <div className="stat-label text-violet-700">Memory Usage</div>
+          <div className="stat-label text-cyan-700">Memory Usage</div>
           <div className="stat-value text-2xl mt-1.5">{profile.memory_usage}</div>
           <div className="stat-sub">estimated size</div>
         </motion.div>

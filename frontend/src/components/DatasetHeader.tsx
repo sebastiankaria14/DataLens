@@ -32,12 +32,12 @@ const DatasetHeader: React.FC<DatasetHeaderProps> = ({ dataset, isLoading }) => 
 
   return (
     <>
-      <nav className="bg-white border-b border-slate-200">
+      <nav className="app-navbar">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <button onClick={() => navigate('/dashboard')} className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-sky-800 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">DL</span>
                 </div>
                 <span className="text-xl font-bold text-slate-900">DataLens</span>
@@ -55,7 +55,7 @@ const DatasetHeader: React.FC<DatasetHeaderProps> = ({ dataset, isLoading }) => 
         </div>
       </nav>
 
-      <div className="bg-white border-b border-slate-200">
+      <div className="bg-white/80 border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -81,7 +81,7 @@ const DatasetHeader: React.FC<DatasetHeaderProps> = ({ dataset, isLoading }) => 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.1, duration: 0.3 }}
-                className="p-4 bg-white rounded-xl border border-slate-100 hover:border-indigo-200 transition-colors"
+                className="p-4 bg-white rounded-xl border border-slate-100 hover:border-sky-200 transition-colors"
               >
                 <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">Rows</div>
                 <div className="text-2xl font-bold text-slate-900 mt-1 tabular-nums">{dataset?.row_count?.toLocaleString() ?? '—'}</div>
@@ -91,7 +91,7 @@ const DatasetHeader: React.FC<DatasetHeaderProps> = ({ dataset, isLoading }) => 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.15, duration: 0.3 }}
-                className="p-4 bg-white rounded-xl border border-slate-100 hover:border-indigo-200 transition-colors"
+                className="p-4 bg-white rounded-xl border border-slate-100 hover:border-sky-200 transition-colors"
               >
                 <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">Columns</div>
                 <div className="text-2xl font-bold text-slate-900 mt-1 tabular-nums">{dataset?.column_count ?? '—'}</div>
@@ -101,7 +101,7 @@ const DatasetHeader: React.FC<DatasetHeaderProps> = ({ dataset, isLoading }) => 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.2, duration: 0.3 }}
-                className="p-4 bg-white rounded-xl border border-slate-100 hover:border-indigo-200 transition-colors"
+                className="p-4 bg-white rounded-xl border border-slate-100 hover:border-sky-200 transition-colors"
               >
                 <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">Created</div>
                 <div className="text-sm font-semibold text-slate-900 mt-1">
@@ -113,7 +113,7 @@ const DatasetHeader: React.FC<DatasetHeaderProps> = ({ dataset, isLoading }) => 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.25, duration: 0.3 }}
-                className="p-4 bg-white rounded-xl border border-slate-100 hover:border-indigo-200 transition-colors"
+                className="p-4 bg-white rounded-xl border border-slate-100 hover:border-sky-200 transition-colors"
               >
                 <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">Profiled</div>
                 <div className="text-sm font-semibold text-slate-900 mt-1">

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import authService from '../services/auth';
 
 const ForgotPassword: React.FC = () => {
@@ -26,18 +27,18 @@ const ForgotPassword: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 px-4">
+    <div className="page-shell flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">DataLens</h1>
-          <p className="text-gray-600">Reset your password</p>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2 tracking-tight">DataLens</h1>
+          <p className="text-slate-600">Reset your password</p>
         </div>
 
         {/* Forgot Password Card */}
-        <div className="card">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Forgot Password</h2>
-          <p className="text-gray-600 text-sm mb-6">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="surface-pane p-7 sm:p-8">
+          <h2 className="text-2xl font-bold text-slate-900 mb-2 tracking-tight">Forgot Password</h2>
+          <p className="text-slate-600 text-sm mb-6">
             Enter your email address and we'll send you instructions to reset your password.
           </p>
 
@@ -82,21 +83,21 @@ const ForgotPassword: React.FC = () => {
           <div className="mt-6 text-center space-y-2">
             <Link
               to="/login"
-              className="block text-sm text-primary-600 hover:text-primary-700 font-medium"
+              className="block text-sm text-sky-700 hover:text-sky-800 font-medium"
             >
               ← Back to Sign In
             </Link>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-slate-600">
               Don't have an account?{' '}
-              <Link to="/signup" className="text-primary-600 hover:text-primary-700 font-medium">
+              <Link to="/signup" className="text-sky-700 hover:text-sky-800 font-medium">
                 Sign up
               </Link>
             </p>
           </div>
-        </div>
+        </motion.div>
 
         {/* Footer */}
-        <p className="mt-8 text-center text-sm text-gray-500">
+        <p className="mt-8 text-center text-sm text-slate-500">
           Need help? Contact support@datalens.example.com
         </p>
       </div>

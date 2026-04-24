@@ -99,14 +99,14 @@ const UploadDataset: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="page-shell">
       {/* Navbar */}
-      <nav className="bg-white border-b border-slate-200">
+      <nav className="app-navbar">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <button onClick={() => navigate('/')} className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-sky-800 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">DL</span>
                 </div>
                 <span className="text-xl font-bold text-slate-900">DataLens</span>
@@ -117,7 +117,7 @@ const UploadDataset: React.FC = () => {
       </nav>
       
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
+        <div className="mb-8 reveal-up">
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Upload Dataset</h1>
           <p className="mt-1 text-sm text-slate-500">
             Upload your raw dataset for profiling and cleaning
@@ -125,13 +125,13 @@ const UploadDataset: React.FC = () => {
         </div>
 
         {/* Upload Card */}
-        <div className="card">
+        <div className="surface-pane p-6 sm:p-7 reveal-up" style={{ animationDelay: '80ms' }}>
           {/* File Drop Zone */}
           <div
             className={`border-2 border-dashed rounded-xl p-10 text-center transition-colors cursor-pointer ${
               dragActive
-                ? 'border-indigo-400 bg-indigo-50'
-                : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50'
+                ? 'border-sky-400 bg-sky-50'
+                : 'border-slate-200 hover:border-sky-300 hover:bg-slate-50'
             }`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
@@ -153,7 +153,7 @@ const UploadDataset: React.FC = () => {
             </svg>
             <div className="mt-4">
               <label htmlFor="file-upload" className="cursor-pointer">
-                <span className="text-indigo-600 hover:text-indigo-700 font-medium">
+                <span className="text-sky-700 hover:text-sky-800 font-medium">
                   Upload a file
                 </span>
                 <input
@@ -177,8 +177,8 @@ const UploadDataset: React.FC = () => {
             <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="w-9 h-9 bg-indigo-50 rounded-lg flex items-center justify-center">
-                    <svg className="w-4 h-4 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="w-9 h-9 bg-sky-50 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-sky-700" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
                     </svg>
                   </div>
@@ -208,7 +208,7 @@ const UploadDataset: React.FC = () => {
               </div>
               <div className="w-full bg-slate-100 rounded-full h-1.5">
                 <div 
-                  className="bg-indigo-500 h-1.5 rounded-full transition-all duration-300" 
+                  className="bg-sky-700 h-1.5 rounded-full transition-all duration-300" 
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
@@ -263,7 +263,7 @@ const UploadDataset: React.FC = () => {
         </div>
 
         {/* Info Section */}
-        <div className="mt-6 card bg-slate-50 border border-slate-100">
+        <div className="mt-6 card bg-slate-50 border border-slate-100 reveal-up" style={{ animationDelay: '140ms' }}>
           <h3 className="text-sm font-semibold text-slate-900 mb-3">What happens next?</h3>
           <ul className="space-y-2">
             {[
@@ -273,7 +273,7 @@ const UploadDataset: React.FC = () => {
               'Large files are processed in chunks — no memory issues',
             ].map((item) => (
               <li key={item} className="flex items-start gap-2.5 text-xs text-slate-500">
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 flex-shrink-0 mt-1" />
+                <span className="w-1.5 h-1.5 rounded-full bg-sky-500 flex-shrink-0 mt-1" />
                 {item}
               </li>
             ))}

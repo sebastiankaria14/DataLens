@@ -77,9 +77,9 @@ const ChatWorkspace: React.FC<ChatWorkspaceProps> = ({
             className="fixed inset-4 md:inset-8 lg:inset-16 bg-white rounded-3xl shadow-2xl z-50 flex flex-col overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-white">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-sky-50 to-white">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">🤖 Dataset Copilot</h2>
+                <h2 className="text-2xl font-bold text-gray-900">Dataset Copilot</h2>
                 <p className="text-sm text-gray-600 mt-1">
                   Dataset loaded: <span className="font-semibold">{datasetName}</span>
                   {rowCount !== undefined && columnCount !== undefined && (
@@ -114,13 +114,13 @@ const ChatWorkspace: React.FC<ChatWorkspaceProps> = ({
                     <div
                       className={`max-w-[80%] px-5 py-3 rounded-2xl shadow-sm ${
                         msg.role === 'user'
-                          ? 'bg-gradient-to-br from-purple-600 to-purple-700 text-white'
+                          ? 'bg-gradient-to-br from-sky-700 to-sky-800 text-white'
                           : 'bg-white border border-gray-200 text-gray-900'
                       }`}
                     >
                       {msg.role === 'assistant' && (
                         <div className="flex items-center space-x-2 mb-2">
-                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-sky-700 to-sky-800 flex items-center justify-center">
                             <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                             </svg>
@@ -140,9 +140,9 @@ const ChatWorkspace: React.FC<ChatWorkspaceProps> = ({
                   >
                     <div className="bg-white border border-gray-200 px-5 py-3 rounded-2xl shadow-sm">
                       <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                        <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                        <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                        <div className="w-2 h-2 bg-sky-700 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                        <div className="w-2 h-2 bg-sky-700 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                        <div className="w-2 h-2 bg-sky-700 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                       </div>
                     </div>
                   </motion.div>
@@ -177,7 +177,7 @@ const ChatWorkspace: React.FC<ChatWorkspaceProps> = ({
               <div className="max-w-4xl mx-auto flex gap-3">
                 <textarea
                   ref={inputRef}
-                  className="flex-1 border border-gray-300 rounded-2xl px-4 py-3 text-sm resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="flex-1 border border-gray-300 rounded-2xl px-4 py-3 text-sm resize-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all"
                   rows={2}
                   placeholder="Ask about rows, columns, missing values, targets, or modeling steps..."
                   value={input}
@@ -188,7 +188,7 @@ const ChatWorkspace: React.FC<ChatWorkspaceProps> = ({
                 <button
                   onClick={() => onSend()}
                   disabled={!input.trim() || isLoading}
-                  className="px-6 py-3 bg-gradient-to-br from-purple-600 to-purple-700 text-white font-semibold rounded-2xl hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  className="px-6 py-3 bg-gradient-to-br from-sky-700 to-sky-800 text-white font-semibold rounded-2xl hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   {isLoading ? (
                     <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">

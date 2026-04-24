@@ -23,7 +23,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ onExploreClick, onChatCli
         className={`group relative overflow-hidden rounded-2xl p-8 text-left shadow-lg transition-all duration-300 ${
           disabled
             ? 'bg-gray-100 cursor-not-allowed opacity-60'
-            : 'bg-gradient-to-br from-blue-500 to-blue-600 hover:shadow-2xl cursor-pointer'
+            : 'bg-gradient-to-br from-sky-700 to-sky-800 hover:shadow-2xl cursor-pointer'
         }`}
       >
         <div className="relative z-10">
@@ -50,7 +50,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ onExploreClick, onChatCli
           </div>
         </div>
         {!disabled && (
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-br from-sky-300/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         )}
       </motion.button>
 
@@ -62,7 +62,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ onExploreClick, onChatCli
         className={`group relative overflow-hidden rounded-2xl p-8 text-left shadow-lg transition-all duration-300 ${
           disabled
             ? 'bg-gray-100 cursor-not-allowed opacity-60'
-            : 'bg-gradient-to-br from-purple-500 to-purple-600 hover:shadow-2xl cursor-pointer'
+            : 'bg-gradient-to-br from-slate-800 to-slate-900 hover:shadow-2xl cursor-pointer'
         }`}
       >
         <div className="relative z-10">
@@ -76,7 +76,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ onExploreClick, onChatCli
             </div>
             <h3 className={`text-2xl font-bold ${disabled ? 'text-gray-600' : 'text-white'}`}>Chat With Dataset</h3>
           </div>
-          <p className={`text-sm ${disabled ? 'text-gray-500' : 'text-purple-100'}`}>
+          <p className={`text-sm ${disabled ? 'text-gray-500' : 'text-slate-300'}`}>
             Ask questions about your data. Get instant insights, recommendations, and ML guidance.
           </p>
           <div className={`mt-4 inline-flex items-center space-x-2 text-sm font-medium ${
@@ -89,7 +89,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ onExploreClick, onChatCli
           </div>
         </div>
         {!disabled && (
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         )}
       </motion.button>
     </motion.div>

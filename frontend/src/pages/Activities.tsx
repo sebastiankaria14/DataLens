@@ -31,9 +31,9 @@ const iconMap = {
 };
 
 const colorMap: Record<string, { bg: string; text: string; ring: string }> = {
-  upload: { bg: 'bg-blue-100', text: 'text-blue-600', ring: 'ring-blue-200' },
-  profile: { bg: 'bg-green-100', text: 'text-green-600', ring: 'ring-green-200' },
-  clean: { bg: 'bg-purple-100', text: 'text-purple-600', ring: 'ring-purple-200' },
+  upload: { bg: 'bg-sky-100', text: 'text-sky-700', ring: 'ring-sky-200' },
+  profile: { bg: 'bg-emerald-100', text: 'text-emerald-700', ring: 'ring-emerald-200' },
+  clean: { bg: 'bg-cyan-100', text: 'text-cyan-700', ring: 'ring-cyan-200' },
   download: { bg: 'bg-yellow-100', text: 'text-yellow-600', ring: 'ring-yellow-200' },
   login: { bg: 'bg-gray-100', text: 'text-gray-600', ring: 'ring-gray-200' },
 };
@@ -134,16 +134,16 @@ const Activities: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-shell">
       {/* Navbar */}
-      <nav className="bg-white shadow-sm border-b border-gray-200">
+      <nav className="app-navbar">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/dashboard" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-sky-800 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-lg">DL</span>
               </div>
-              <span className="text-xl font-bold text-gray-900">DataLens</span>
+              <span className="text-xl font-bold text-slate-900">DataLens</span>
             </Link>
             <button onClick={() => navigate('/dashboard')} className="btn-secondary text-sm">
               ← Back to Dashboard
@@ -156,21 +156,21 @@ const Activities: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Activities</h1>
-            <p className="mt-1 text-gray-600">Your recent actions and events</p>
+            <h1 className="text-3xl font-bold text-slate-900">Activities</h1>
+            <p className="mt-1 text-slate-600">Your recent actions and events</p>
           </div>
           {!loading && (
-            <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary-50 text-primary-700 text-sm font-medium border border-primary-200">
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-sky-50 text-sky-800 text-sm font-medium border border-sky-200">
               {activities.length} event{activities.length !== 1 ? 's' : ''}
             </span>
           )}
         </div>
 
         {/* Timeline */}
-        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6">
+        <div className="surface-pane p-6">
           {loading ? (
             <div className="text-center py-16">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600 mx-auto mb-4" />
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-sky-700 mx-auto mb-4" />
               <p className="text-gray-500 text-sm">Loading activities…</p>
             </div>
           ) : activities.length === 0 ? (
@@ -202,22 +202,22 @@ const Activities: React.FC = () => {
 
         {/* Activity Summary */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-5 border border-blue-100 shadow-sm">
-            <div className="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 mb-3">
+          <div className="card bg-gradient-to-br from-sky-50 to-white">
+            <div className="w-9 h-9 bg-sky-100 rounded-xl flex items-center justify-center text-sky-700 mb-3">
               {iconMap.upload}
             </div>
             <div className="text-2xl font-bold text-gray-900">{loading ? '—' : uploadCount}</div>
             <div className="text-xs text-gray-500 mt-0.5">Uploads</div>
           </div>
-          <div className="bg-gradient-to-br from-green-50 to-white rounded-2xl p-5 border border-green-100 shadow-sm">
+          <div className="card bg-gradient-to-br from-emerald-50 to-white">
             <div className="w-9 h-9 bg-green-100 rounded-xl flex items-center justify-center text-green-600 mb-3">
               {iconMap.profile}
             </div>
             <div className="text-2xl font-bold text-gray-900">{loading ? '—' : profiledCount}</div>
             <div className="text-xs text-gray-500 mt-0.5">Profiled</div>
           </div>
-          <div className="bg-gradient-to-br from-purple-50 to-white rounded-2xl p-5 border border-purple-100 shadow-sm">
-            <div className="w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600 mb-3">
+          <div className="card bg-gradient-to-br from-cyan-50 to-white">
+            <div className="w-9 h-9 bg-cyan-100 rounded-xl flex items-center justify-center text-cyan-700 mb-3">
               {iconMap.clean}
             </div>
             <div className="text-2xl font-bold text-gray-900">{loading ? '—' : cleanedCount}</div>

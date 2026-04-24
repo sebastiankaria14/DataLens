@@ -76,16 +76,16 @@ const Notifications: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-shell">
       {/* Navbar */}
-      <nav className="bg-white shadow-sm border-b border-gray-200">
+      <nav className="app-navbar">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/dashboard" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-sky-800 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-lg">DL</span>
               </div>
-              <span className="text-xl font-bold text-gray-900">DataLens</span>
+              <span className="text-xl font-bold text-slate-900">DataLens</span>
             </Link>
             <button onClick={() => navigate('/dashboard')} className="btn-secondary text-sm">
               ← Back to Dashboard
@@ -98,12 +98,12 @@ const Notifications: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
-            <p className="mt-1 text-gray-600">Stay updated on your dataset activity</p>
+            <h1 className="text-3xl font-bold text-slate-900">Notifications</h1>
+            <p className="mt-1 text-slate-600">Stay updated on your dataset activity</p>
           </div>
           <div className="flex items-center gap-3">
             {unreadCount > 0 && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary-50 text-primary-700 text-sm font-medium border border-primary-200">
+              <span className="inline-flex items-center px-3 py-1 rounded-full bg-sky-50 text-sky-800 text-sm font-medium border border-sky-200">
                 {unreadCount} unread
               </span>
             )}
@@ -118,7 +118,7 @@ const Notifications: React.FC = () => {
         {/* Notifications List */}
         <div className="space-y-3">
           {notifications.length === 0 ? (
-            <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6 text-center py-16">
+            <div className="surface-pane p-6 text-center py-16">
               <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
               </div>

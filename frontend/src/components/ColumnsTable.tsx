@@ -41,12 +41,12 @@ const ColumnsTable: React.FC<ColumnsTableProps> = ({ profile }) => {
               >
                 <td className="px-6 py-3.5 whitespace-nowrap">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full flex-shrink-0"/>
+                    <div className="w-1.5 h-1.5 bg-sky-500 rounded-full flex-shrink-0"/>
                     <span className="text-sm font-medium text-slate-900">{name}</span>
                   </div>
                 </td>
                 <td className="px-6 py-3.5 whitespace-nowrap">
-                  <span className="badge badge-indigo font-mono text-[11px]">
+                  <span className="badge badge-cyan font-mono text-[11px]">
                     {info?.dtype ?? profile.data_types?.[name] ?? '—'}
                   </span>
                 </td>

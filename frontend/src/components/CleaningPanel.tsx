@@ -170,7 +170,7 @@ const CleaningPanel: React.FC<CleaningPanelProps> = ({
               <label className="text-sm font-medium text-gray-700">Handle Missing Values</label>
               <p className="text-xs text-gray-500">{totalMissing} missing cells total</p>
               <select
-                className="mt-1 border border-slate-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:ring-2 focus:ring-indigo-400 outline-none transition"
+                className="mt-1 border border-slate-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:ring-2 focus:ring-sky-400 outline-none transition"
                 value={options.handle_missing ?? ''}
                 onChange={(e) => setOptions((o) => ({ ...o, handle_missing: (e.target.value || null) as any }))}
               >
@@ -198,7 +198,7 @@ const CleaningPanel: React.FC<CleaningPanelProps> = ({
                   <div>
                     <label className="text-xs font-medium text-gray-600">Detection</label>
                     <select
-                      className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-indigo-400 outline-none"
+                      className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-sky-400 outline-none"
                       value={options.outlier_method}
                       onChange={(e) => setOptions((o) => ({ ...o, outlier_method: e.target.value as any }))}
                     >
@@ -209,7 +209,7 @@ const CleaningPanel: React.FC<CleaningPanelProps> = ({
                   <div>
                     <label className="text-xs font-medium text-gray-600">Action</label>
                     <select
-                      className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-indigo-400 outline-none"
+                      className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-sky-400 outline-none"
                       value={options.outlier_action}
                       onChange={(e) => setOptions((o) => ({ ...o, outlier_action: e.target.value as any }))}
                     >
@@ -263,8 +263,8 @@ const CleaningPanel: React.FC<CleaningPanelProps> = ({
             isCleaning
               ? 'bg-slate-300 cursor-not-allowed'
               : isCleaned
-              ? 'bg-indigo-600 hover:bg-indigo-700'
-              : 'bg-indigo-600 hover:bg-indigo-700'
+              ? 'bg-sky-700 hover:bg-sky-800'
+              : 'bg-sky-700 hover:bg-sky-800'
           }`}
         >
           {isCleaning ? (
@@ -333,7 +333,7 @@ const CleaningPanel: React.FC<CleaningPanelProps> = ({
                   <button
                     key={fmt}
                     onClick={() => { setDownloadFormat(fmt); setTimeout(handleDownload, 50); }}
-                    className="px-4 py-2 rounded-lg text-xs font-semibold border border-slate-200 text-slate-700 hover:border-indigo-300 hover:text-indigo-600 transition-all capitalize"
+                    className="px-4 py-2 rounded-lg text-xs font-semibold border border-slate-200 text-slate-700 hover:border-sky-300 hover:text-sky-700 transition-all capitalize"
                   >
                     {fmt.toUpperCase()}
                   </button>
@@ -351,7 +351,7 @@ const CleaningPanel: React.FC<CleaningPanelProps> = ({
               <button
                 key={fmt}
                 onClick={() => { setDownloadFormat(fmt); setTimeout(handleDownload, 50); }}
-                className="px-4 py-2 rounded-lg text-xs font-semibold border border-slate-200 text-slate-700 hover:border-indigo-300 hover:text-indigo-600 transition-all capitalize"
+                className="px-4 py-2 rounded-lg text-xs font-semibold border border-slate-200 text-slate-700 hover:border-sky-300 hover:text-sky-700 transition-all capitalize"
               >
                 {fmt.toUpperCase()}
               </button>
@@ -397,12 +397,12 @@ interface ToggleOptionProps {
   onChange: (v: boolean) => void;
 }
 const ToggleOption: React.FC<ToggleOptionProps> = ({ label, description, checked, onChange }) => (
-  <label className="flex items-start gap-4 cursor-pointer group p-4 rounded-xl border border-slate-100 hover:border-indigo-200 transition-all">
+  <label className="flex items-start gap-4 cursor-pointer group p-4 rounded-xl border border-slate-100 hover:border-sky-200 transition-all">
     <div className="mt-0.5 flex-shrink-0">
       <div
         onClick={() => onChange(!checked)}
         className={`w-10 h-5 rounded-full transition-colors duration-200 relative ${
-          checked ? 'bg-indigo-500' : 'bg-slate-200'
+          checked ? 'bg-sky-600' : 'bg-slate-200'
         }`}
       >
         <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${
